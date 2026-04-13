@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MRI Protocol Generator </title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg0:#080c12;--bg1:#0e1420;--bg2:#131b29;--bg3:#192133;--bg4:#1f293f;--bg5:#26334d;
+--teal:#00e5b8;--teal2:#00b892;--teal3:#007a60;--tg:rgba(0,229,184,.1);
+--blue:#5aa3ff;--blue2:#2d6fd4;--amber:#ffb237;--coral:#ff6b6b;--purple:#b197fc;--green:#25d366;
+--t0:#eef2ff;--t1:#b8c8e0;--t2:#6a82a0;--t3:#3a4d65;
+--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--b3:rgba(255,255,255,.14);
+--mono:'DM Mono',monospace;--sans:'Inter',sans-serif;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg0);color:var(--t0);font-size:14px;line-height:1.6;min-height:100vh}
+.shell{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+.sb{background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow:hidden}
+.main{background:var(--bg0);overflow-y:auto;min-height:100vh}
+.main::-webkit-scrollbar{width:3px}
+.main::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
+.sb-hd{padding:16px 14px 12px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--blue2));display:flex;align-items:center;justify-content:center}
+.logo-tx{font-family:var(--display);font-size:13px;font-weight:700;color:var(--t0)}
+.logo-sx{font-size:9px;color:var(--t2);margin-top:1px}
+.sb-srch{padding:8px 10px;border-bottom:1px solid var(--b1);flex-shrink:0;position:relative}
+.sb-srch input{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:6px 9px 6px 28px;font-family:var(--sans);font-size:11px;color:var(--t0);outline:none}
+.sb-srch input:focus{border-color:var(--teal)}
+.sb-srch input::placeholder{color:var(--t3)}
+.srch-ico{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--t3);pointer-events:none}
+.srch-drop{position:absolute;left:10px;right:10px;top:calc(100% - 8px);background:var(--bg3);border:1px solid var(--b2);border-radius:8px;z-index:300;max-height:200px;overflow-y:auto;display:none}
+.srch-drop.open{display:block}
+.srch-item{padding:7px 10px;cursor:pointer;font-size:11px;color:var(--t1);border-bottom:1px solid var(--b1)}
+.srch-item:last-child{border-bottom:none}
+.srch-item:hover{background:var(--bg4);color:var(--teal)}
+.si-org{font-weight:500;color:var(--t0)}
+.si-ind{font-size:10px;color:var(--teal);margin-top:1px}
+.sb-nav{flex:1;overflow-y:auto;padding:6px}
+.sb-nav::-webkit-scrollbar{width:2px}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--bg5)}
+.grp{margin-bottom:1px}
+.grp-btn{width:100%;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;border:none;background:transparent;cursor:pointer;color:var(--t1);font-family:var(--sans);font-size:11.5px;font-weight:500;transition:all .15s;text-align:left}
+.grp-btn:hover{background:var(--bg3);color:var(--t0)}
+.grp-btn.active{background:var(--tg);color:var(--teal);border:1px solid rgba(0,229,184,.12)}
+.grp-ic{width:22px;height:22px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.grp-btn.active .grp-ic{background:rgba(0,229,184,.12)}
+.grp-chv{margin-left:auto;font-size:8px;color:var(--t3);transition:transform .18s}
+.grp-btn.open .grp-chv{transform:rotate(90deg)}
+.grp-items{display:none;padding-left:6px;margin-top:1px}
+.grp-items.open{display:block}
+.organ-btn{width:100%;display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--t2);font-family:var(--sans);font-size:11px;transition:all .15s;text-align:left}
+.organ-btn:hover{background:var(--bg3);color:var(--t1)}
+.organ-btn.sel{background:var(--bg4);color:var(--teal);font-weight:500}
+.organ-btn::before{content:'';width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0}
+.sb-ft{padding:6px;border-top:1px solid var(--b1);flex-shrink:0}
+.ft-tab{width:100%;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;border:none;background:transparent;cursor:pointer;color:var(--t2);font-family:var(--sans);font-size:11px;transition:all .15s;margin-bottom:1px;text-align:left}
+.ft-tab:hover{background:var(--bg3);color:var(--t1)}
+.ft-tab.active{background:var(--bg4);color:var(--teal)}
+.mh{padding:20px 26px 0;border-bottom:1px solid var(--b1)}
+.bc{font-size:10px;color:var(--t3);margin-bottom:8px}
+.bc span{color:var(--t1)}
+.pg-title{font-family:var(--display);font-size:19px;font-weight:700;color:var(--t0);letter-spacing:-.3px}
+.pg-sub{font-size:11px;color:var(--t2);margin-top:2px;padding-bottom:16px}
+.mb{padding:20px 26px}
+.welcome{text-align:center;padding:48px 24px}
+.wlc-ic{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,rgba(0,229,184,.1),rgba(90,163,255,.1));border:1px solid rgba(0,229,184,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px}
+.wlc-h{font-family:var(--display);font-size:20px;font-weight:700;color:var(--t0);margin-bottom:5px}
+.wlc-p{color:var(--t2);max-width:340px;margin:0 auto 24px;font-size:12px}
+.bg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:580px;margin:0 auto}
+.bg-card{background:var(--bg2);border:1px solid var(--b1);border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;transition:all .2s}
+.bg-card:hover{background:var(--bg3);border-color:var(--b2);transform:translateY(-2px)}
+.bg-ico{font-size:22px;margin-bottom:4px}
+.bg-nm{font-size:10px;font-weight:500;color:var(--t1)}
+.bg-ct{font-size:9px;color:var(--t3);margin-top:1px}
+.card{background:var(--bg2);border:1px solid var(--b1);border-radius:11px;padding:14px;margin-bottom:12px}
+.sec-lbl{font-size:9px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;display:flex;align-items:center;gap:4px}
+.sec-lbl::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal)}
+.smart-ta{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:8px 11px;font-family:var(--sans);font-size:12px;color:var(--t0);outline:none;resize:none;transition:border .15s}
+.smart-ta:focus{border-color:var(--teal)}
+.smart-ta::placeholder{color:var(--t3)}
+.chip-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.chip{background:var(--bg3);border:1px solid var(--b2);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--t1);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.chip:hover{border-color:var(--teal);color:var(--teal)}
+.chip.hot{border-color:rgba(0,229,184,.25);color:var(--teal);background:var(--tg)}
+.chip.on{background:var(--teal3);border-color:var(--teal2);color:var(--teal);font-weight:500}
+.cfg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.cfg-card{background:var(--bg2);border:1px solid var(--b1);border-radius:10px;padding:10px}
+.cfg-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.tog-row{display:flex;border:1px solid var(--b2);border-radius:5px;overflow:hidden}
+.tog{flex:1;padding:5px 2px;background:transparent;border:none;border-right:1px solid var(--b2);font-size:10px;color:var(--t2);cursor:pointer;font-family:var(--sans);transition:all .15s;text-align:center}
+.tog:last-child{border-right:none}
+.tog.on{background:rgba(0,229,184,.15);color:var(--teal);font-weight:500}
+.cfg-sel{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:5px;padding:5px 8px;font-family:var(--sans);font-size:11px;color:var(--t0);outline:none;appearance:none;cursor:pointer}
+.cfg-sel:focus{border-color:var(--teal)}
+.vnd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.vnd{background:var(--bg2);border:1px solid var(--b1);border-radius:10px;padding:9px 6px;cursor:pointer;text-align:center;transition:all .2s;position:relative}
+.vnd:hover{border-color:var(--b2)}
+.vnd.sel{border-color:var(--teal);background:var(--tg)}
+.vnd-chk{position:absolute;top:4px;right:4px;width:13px;height:13px;border-radius:50%;background:var(--teal);display:none;align-items:center;justify-content:center;font-size:7px;color:#000;font-weight:700}
+.vnd.sel .vnd-chk{display:flex}
+.vnd-nm{font-size:10px;font-weight:600;color:var(--t0);margin-top:4px;font-family:var(--display)}
+.vnd-md{font-size:8px;color:var(--t3);margin-top:1px}
+.gen-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--teal),var(--blue2));border:none;border-radius:10px;font-family:var(--display);font-size:13px;font-weight:700;color:#fff;cursor:pointer;transition:all .2s}
+.gen-btn:hover{opacity:.88;transform:translateY(-1px)}
+.gen-btn:active{transform:scale(.99)}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.ld-bar{width:100%;height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:10px}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:2px;animation:lp 1.6s ease-in-out infinite;width:50%}
+@keyframes lp{0%{transform:translateX(-120%)}100%{transform:translateX(220%)}}
+.ld-msg{font-size:10px;color:var(--t2);text-align:center;margin-top:5px;font-style:italic}
+.result{margin-top:16px;animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.rh{background:var(--bg2);border:1px solid var(--b1);border-radius:12px 12px 0 0;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.r-title{font-family:var(--display);font-size:15px;font-weight:700;color:var(--t0)}
+.r-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mb-t{background:rgba(0,229,184,.1);color:var(--teal);border:1px solid rgba(0,229,184,.18);padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500}
+.mb-b{background:rgba(90,163,255,.1);color:var(--blue);border:1px solid rgba(90,163,255,.18);padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500}
+.mb-a{background:rgba(255,178,55,.1);color:var(--amber);border:1px solid rgba(255,178,55,.18);padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500}
+.mb-c{background:rgba(255,107,107,.1);color:var(--coral);border:1px solid rgba(255,107,107,.18);padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500}
+.mb-p{background:rgba(177,151,252,.1);color:var(--purple);border:1px solid rgba(177,151,252,.18);padding:1px 7px;border-radius:20px;font-size:9px;font-weight:500}
+.r-acts{display:flex;gap:4px;flex-shrink:0}
+.rbtn{padding:5px 10px;background:var(--bg3);border:1px solid var(--b2);border-radius:6px;font-size:10px;color:var(--t1);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.rbtn:hover{background:var(--bg4);color:var(--t0)}
+.rbtn.active{background:var(--tg);border-color:rgba(0,229,184,.25);color:var(--teal)}
+.seq-tbl{background:var(--bg2);border:1px solid var(--b1);border-top:none;border-radius:0 0 12px 12px;overflow:hidden}
+.seq-hd{display:grid;grid-template-columns:24px 1fr 80px 58px 58px 58px 58px 30px;gap:5px;padding:7px 12px;background:var(--bg1);border-bottom:1px solid var(--b1)}
+.seq-th{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.seq-row{display:grid;grid-template-columns:24px 1fr 80px 58px 58px 58px 58px 30px;gap:5px;padding:9px 12px;border-bottom:1px solid var(--b1);align-items:center;transition:background .1s}
+.seq-row:last-child{border-bottom:none}
+.seq-row:hover{background:var(--bg3)}
+.seq-num{width:20px;height:20px;border-radius:4px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:var(--t2);font-family:var(--mono)}
+.seq-nm{font-size:11px;font-weight:500;color:var(--t0)}
+.seq-nt{font-size:9px;color:var(--t3);margin-top:1px}
+.pl{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:500;display:inline-block}
+.pl-ax{background:rgba(0,229,184,.1);color:var(--teal)}
+.pl-sag{background:rgba(90,163,255,.1);color:var(--blue)}
+.pl-cor{background:rgba(255,178,55,.1);color:var(--amber)}
+.pl-mul{background:rgba(177,151,252,.1);color:var(--purple)}
+.pc{font-size:10px;color:var(--t1);font-family:var(--mono)}
+.pc.hi{color:var(--teal);font-weight:500}
+.edit-inp{width:100%;background:var(--bg4);border:1px solid var(--teal3);border-radius:3px;padding:2px 4px;font-family:var(--mono);font-size:10px;color:var(--teal);text-align:center;outline:none}
+.rm-btn{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;padding:2px;border-radius:3px;transition:all .15s}
+.rm-btn:hover{background:rgba(255,107,107,.1);color:var(--coral)}
+.xcard{background:var(--bg2);border:1px solid var(--b1);border-radius:10px;padding:12px;margin-top:8px}
+.xt{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.sp-chip{padding:2px 8px;border-radius:20px;font-size:10px;background:rgba(177,151,252,.1);color:var(--purple);border:1px solid rgba(177,151,252,.18);margin:2px;display:inline-block}
+.note-box{font-size:11px;color:var(--amber);background:rgba(255,178,55,.05);border:1px solid rgba(255,178,55,.15);border-radius:7px;padding:8px 10px;line-height:1.7}
+.c-alert{background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.18);border-radius:10px;padding:10px 13px;margin-top:8px;display:flex;align-items:center;gap:9px;font-size:11px;color:var(--t1)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cf{display:flex;flex-direction:column;gap:4px}
+.cl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.7px}
+.ci{background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:7px 10px;font-family:var(--sans);font-size:12px;color:var(--t0);outline:none;width:100%;transition:border .15s}
+.ci:focus{border-color:var(--teal)}
+.cs{background:var(--bg3);border:1px solid var(--b2);border-radius:7px;padding:7px 10px;font-family:var(--sans);font-size:11px;color:var(--t0);outline:none;appearance:none;width:100%;cursor:pointer}
+.cs:focus{border-color:var(--teal)}
+.dose-res{background:linear-gradient(135deg,rgba(0,229,184,.07),rgba(90,163,255,.07));border:1px solid rgba(0,229,184,.16);border-radius:12px;padding:18px;text-align:center;margin-top:14px}
+.dose-vol{font-family:var(--display);font-size:42px;font-weight:700;color:var(--teal);line-height:1}
+.dose-u{font-size:15px;color:var(--teal2);margin-left:2px}
+.dose-lbl{font-size:10px;color:var(--t2);margin-top:4px}
+.d-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.ds{background:var(--bg3);border-radius:7px;padding:8px;text-align:center}
+.ds-v{font-size:13px;font-weight:600;color:var(--t0);font-family:var(--mono)}
+.ds-l{font-size:8px;color:var(--t3);margin-top:2px}
+.sfn{background:rgba(255,178,55,.05);border:1px solid rgba(255,178,55,.16);border-radius:7px;padding:9px;font-size:10px;color:var(--amber);margin-top:10px;line-height:1.7}
+.fav-card{background:var(--bg2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;transition:all .15s}
+.fav-card:hover{background:var(--bg3);border-color:var(--b2)}
+.fav-ico{width:34px;height:34px;border-radius:8px;background:var(--tg);border:1px solid rgba(0,229,184,.18);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.fav-nm{font-size:11px;font-weight:500;color:var(--t0)}
+.fav-mt{font-size:9px;color:var(--t3);margin-top:1px}
+.fav-acts{display:flex;gap:4px}
+.fb{padding:4px 9px;background:var(--bg3);border:1px solid var(--b2);border-radius:6px;font-size:9px;color:var(--t1);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.fb:hover{background:var(--bg4);color:var(--t0)}
+.emp{text-align:center;padding:48px 20px;color:var(--t3)}
+.emp-ico{font-size:32px;margin-bottom:10px}
+.hidden{display:none!important}
+.clink{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;text-decoration:none;transition:border .2s;margin-bottom:10px}
+.clink:hover{border-color:var(--teal)}
+.clink-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.clink-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.clink-val{font-size:12px;font-weight:500;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-hd">
+    <div class="logo">
+      <div class="logo-mk">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="white" stroke-width="1.2"/>
+          <ellipse cx="8" cy="8" rx="2.5" ry="6.5" stroke="white" stroke-width=".9"/>
+          <line x1="1.5" y1="8" x2="14.5" y2="8" stroke="white" stroke-width=".9"/>
+          <circle cx="8" cy="8" r="1.2" fill="white"/>
+        </svg>
+      </div>
+      <div><div class="logo-tx">MRI Protocol</div><div class="logo-sx">MRI Protocol Generator </div></div>
+    </div>
+  </div>
+
+  <div class="sb-srch">
+    <div style="position:relative">
+      <span class="srch-ico">🔍</span>
+      <input id="sb-si" placeholder="Search organ or diagnosis..." autocomplete="off">
+    </div>
+    <div id="srch-drop" class="srch-drop"></div>
+  </div>
+
+  <nav class="sb-nav" id="organ-nav"></nav>
+
+  <div class="sb-ft">
+    <button class="ft-tab active" id="ft-gen" onclick="showTab('generator',this)"><span>⚡</span>&nbsp;Protocol Generator</button>
+    <button class="ft-tab" id="ft-calc" onclick="showTab('contrast',this)"><span>💉</span>&nbsp;Contrast Calculator</button>
+    <button class="ft-tab" id="ft-fav" onclick="showTab('favorites',this)"><span>★</span>&nbsp;Saved Protocols</button>
+    <button class="ft-tab" id="ft-contact" onclick="showTab('contact',this)"><span>✉</span>&nbsp;Contact</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main">
+
+  <!-- GENERATOR TAB -->
+  <div id="tab-generator">
+    <div id="welcome-view">
+      <div class="welcome">
+        <div class="wlc-ic">🧲</div>
+        <div class="wlc-h">MRI Protocol Generator </div>
+        <p class="wlc-p"> protocols based on clinical indication, scanner vendor, and field strength. Select a body region from the sidebar or tap below.</p>
+        <div class="bg-grid" id="body-grid"></div>
+      </div>
+    </div>
+    <div id="organ-view" class="hidden">
+      <div class="mh">
+        <div class="bc" id="bc-crumb">Home</div>
+        <div class="pg-title" id="pg-title">Brain MRI</div>
+        <div class="pg-sub" id="pg-sub">Select indication and configure protocol</div>
+      </div>
+      <div class="mb">
+        <div class="card">
+          <div class="sec-lbl">clinical input</div>
+          <textarea class="smart-ta" id="smart-ta" rows="2" placeholder="Describe clinical scenario e.g. 'Female 48y, headache + visual field defect, rule out pituitary adenoma'"></textarea>
+          <div class="chip-row" id="sug-chips"></div>
+        </div>
+        <div class="card">
+          <div class="sec-lbl">Clinical indication</div>
+          <div class="chip-row" id="ind-chips"></div>
+        </div>
+        <div class="cfg">
+          <div class="cfg-card">
+            <div class="cfg-lbl">Patient type</div>
+            <div class="tog-row">
+              <button class="tog on" id="tg-ad" onclick="setP('adult')">Adult</button>
+              <button class="tog" id="tg-pd" onclick="setP('pediatric')">Pediatric</button>
+            </div>
+          </div>
+          <div class="cfg-card">
+            <div class="cfg-lbl">Field strength</div>
+            <select class="cfg-sel" id="fld-str">
+              <option value="1.5T">1.5 Tesla</option>
+              <option value="3T" selected>3 Tesla</option>
+              
+            </select>
+          </div>
+          <div class="cfg-card">
+            <div class="cfg-lbl">Contrast</div>
+            <div class="tog-row">
+              <button class="tog on" id="tg-ca" onclick="setC('auto')">Auto</button>
+              <button class="tog" id="tg-cy" onclick="setC('yes')">Yes</button>
+              <button class="tog" id="tg-cn" onclick="setC('no')">No</button>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">Scanner vendor</div>
+        <div class="vnd-grid">
+          <button class="vnd sel" id="v-s" onclick="setV('siemens')">
+            <div class="vnd-chk">✓</div>
+            <svg width="34" height="22" viewBox="0 0 34 22"><rect x="2" y="9" width="30" height="5" rx="2.5" fill="#00e5b8"/><rect x="10" y="3" width="14" height="17" rx="2" fill="none" stroke="#00e5b8" stroke-width="1.2"/><circle cx="17" cy="11.5" r="2.2" fill="#00e5b8" opacity=".4"/></svg>
+            <div class="vnd-nm">Siemens</div><div class="vnd-md">MAGNETOM</div>
+          </button>
+          <button class="vnd" id="v-g" onclick="setV('ge')">
+            <div class="vnd-chk">✓</div>
+            <svg width="34" height="22" viewBox="0 0 34 22"><circle cx="17" cy="11" r="7.5" fill="none" stroke="#5aa3ff" stroke-width="1.2"/><path d="M17 6.5v4.5h4" stroke="#5aa3ff" stroke-width="1.2" stroke-linecap="round"/><circle cx="17" cy="11" r="1.6" fill="#5aa3ff"/></svg>
+            <div class="vnd-nm">GE Healthcare</div><div class="vnd-md">SIGNA</div>
+          </button>
+          <button class="vnd" id="v-p" onclick="setV('philips')">
+            <div class="vnd-chk">✓</div>
+            <svg width="34" height="22" viewBox="0 0 34 22"><rect x="4" y="8" width="5.5" height="8" rx="1.5" fill="#b197fc"/><rect x="13" y="5" width="5.5" height="14" rx="1.5" fill="#b197fc"/><rect x="22" y="8" width="5.5" height="8" rx="1.5" fill="#b197fc"/></svg>
+            <div class="vnd-nm">Philips</div><div class="vnd-md">Ingenia / Elition</div>
+          </button>
+        </div>
+        <button class="gen-btn" id="gen-btn" onclick="generate()">&#9889; Generate Protocol</button>
+        <div id="ld-wrap" class="hidden"><div class="ld-bar"><div class="ld-fill"></div></div><div class="ld-msg" id="ld-msg">Analyzing...</div></div>
+        <div id="res-wrap" class="result hidden">
+          <div class="rh">
+            <div><div class="r-title" id="r-title">Protocol</div><div class="r-meta" id="r-meta"></div></div>
+            <div class="r-acts">
+              <button class="rbtn" id="fav-btn" onclick="saveFav()">&#9733; Save</button>
+              <button class="rbtn" id="edit-btn" onclick="toggleEdit()">&#9998; Edit</button>
+              <button class="rbtn" onclick="exportP()">&#8595; Export</button>
+            </div>
+          </div>
+          <div class="seq-tbl">
+            <div class="seq-hd">
+              <div class="seq-th">#</div><div class="seq-th">Sequence</div><div class="seq-th">Plane</div>
+              <div class="seq-th">TR ms</div><div class="seq-th">TE ms</div><div class="seq-th">TH mm</div>
+              <div class="seq-th">FOV mm</div><div class="seq-th"></div>
+            </div>
+            <div id="seq-body"></div>
+          </div>
+          <div id="sp-wrap" class="xcard hidden"><div class="xt">Special / Advanced Sequences</div><div id="sp-chips" style="display:flex;flex-wrap:wrap;gap:3px"></div></div>
+          <div id="nt-wrap" class="xcard hidden"><div class="xt">Clinical Notes</div><div class="note-box" id="nt-txt"></div></div>
+          <div id="ca-alert" class="c-alert hidden"><span style="font-size:16px">💉</span><div><strong style="color:var(--coral)">Contrast required</strong> — Open Contrast Calculator for exact dose. Standard: 0.1 mmol/kg Gd-DTPA. Always check GFR.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRAST TAB -->
+  <div id="tab-contrast" class="hidden">
+    <div class="mh"><div class="bc">Tools › <span>Contrast Calculator</span></div><div class="pg-title">Contrast Dose Calculator</div><div class="pg-sub">Gadolinium dose, injection parameters &amp; timing</div></div>
+    <div class="mb">
+      <div class="card">
+        <div class="calc-grid">
+          <div class="cf"><div class="cl">Weight (kg)</div><input type="number" class="ci" id="c-wt" placeholder="70" min="1" max="300" oninput="calcDose()"></div>
+          <div class="cf"><div class="cl">Age</div><input type="number" class="ci" id="c-age" placeholder="45" min="0" max="120" oninput="calcDose()"></div>
+          <div class="cf"><div class="cl">Contrast agent</div>
+            <select class="cs" id="c-agent" onchange="calcDose()">
+              <option value="0.1,0.5">Gadovist 0.5 mmol/mL — 0.1 mmol/kg</option>
+              <option value="0.1,1.0">Gadovist 1.0 mmol/mL — 0.1 mmol/kg</option>
+              <option value="0.1,0.5">Magnevist — 0.1 mmol/kg</option>
+              <option value="0.1,0.5">Omniscan — 0.1 mmol/kg</option>
+              <option value="0.1,0.5">ProHance — 0.1 mmol/kg</option>
+              <option value="0.1,0.5">Dotarem (macrocyclic) — 0.1 mmol/kg</option>
+              <option value="0.2,0.5">Double-dose Gd — 0.2 mmol/kg</option>
+              <option value="0.025,0.25">Primovist / Eovist (hepatobiliary) — 0.025 mmol/kg</option>
+            </select>
+          </div>
+          <div class="cf"><div class="cl">Injection rate</div>
+            <select class="cs" id="c-rate" onchange="calcDose()">
+              <option value="2">2 mL/s — Standard brain / spine</option>
+              <option value="3">3 mL/s — Dynamic liver / abdomen</option>
+              <option value="4">4 mL/s — MRA / cardiac</option>
+              <option value="1">1 mL/s — Pediatric / slow</option>
+            </select>
+          </div>
+        </div>
+        <div id="dose-out" class="hidden">
+          <div class="dose-res">
+            <div><span class="dose-vol" id="d-vol">--</span><span class="dose-u">mL</span></div>
+            <div class="dose-lbl">Gadolinium volume to administer</div>
+          </div>
+          <div class="d-stats">
+            <div class="ds"><div class="ds-v" id="d-mmol">--</div><div class="ds-l">Total mmol</div></div>
+            <div class="ds"><div class="ds-v" id="d-time">-- s</div><div class="ds-l">Injection time</div></div>
+            <div class="ds"><div class="ds-v">20 mL</div><div class="ds-l">Saline flush</div></div>
+            <div class="ds"><div class="ds-v">60 s</div><div class="ds-l">Scan delay</div></div>
+          </div>
+          <div class="sfn" id="d-sfn"></div>
+        </div>
+        <div id="dose-ph" style="text-align:center;padding:28px;color:var(--t3);font-size:11px">Enter patient weight above to calculate dose</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVORITES TAB -->
+  <div id="tab-favorites" class="hidden">
+    <div class="mh"><div class="bc">Tools › <span>Saved Protocols</span></div><div class="pg-title">Saved Protocols</div><div class="pg-sub">Your customized MRI protocols</div></div>
+    <div class="mb">
+      <div id="fav-list"></div>
+      <div id="fav-emp" class="emp"><div class="emp-ico">📋</div><div style="font-size:12px">No saved protocols yet.<br>Generate a protocol and click ★ Save.</div></div>
+    </div>
+  </div>
+
+  <!-- CONTACT TAB -->
+  <div id="tab-contact" class="hidden">
+
+  <div class="mh">
+    <div class="bc">Info › <span>Contact</span></div>
+    <div class="pg-title">Generator Developer</div>
+    <div class="pg-sub">Reach out for questions, collaboration, or protocol requests</div>
+  </div>
+
+  <div class="mb">
+
+    <div style="background:linear-gradient(135deg,rgba(0,229,184,.08),rgba(90,163,255,.08));
+                border:1px solid rgba(0,229,184,.2);
+                border-radius:16px;
+                padding:28px 24px;
+                margin-bottom:16px;
+                text-align:center">
+
+    <!-- الدايرة -->
+      <div style="width:76px;
+                  height:76px;
+                  border-radius:50%;
+                  background:linear-gradient(135deg,var(--teal),var(--blue2));
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  margin:0 auto 14px;
+                  overflow:hidden;">
+
+        <!-- الصورة -->
+        <a href="#">
+          <img src="E:\New folder\image\my image.png" alt="profile image"
+               style="
+                 width:110%;
+                 height:110%;
+                 border-radius:50%;
+                 object-fit:cover;
+                 object-position:center 30%;
+                 transform:translateY(5%);
+                 cursor:pointer;
+                 transition:0.3s;
+               "
+               onmouseover="this.style.transform='translateY(-5%) scale(1.1)'"
+               onmouseout="this.style.transform='translateY(-5%) scale(1)'"
+          >
+        </a>
+      </div>
+        <div style="font-family:var(--display);font-size:18px;font-weight:700;color:var(--t0);letter-spacing:-.2px">HUSSIEN IBRAHIM ELBANNA <br>
+          RADIOLOGY TECHNOLOGIST
+        </div>
+        <div style="font-size:11px;color:var(--teal);margin-top:5px;font-weight:500">MRI Protocol Generator — Developer</div>
+        <div style="height:1px;background:rgba(255,255,255,.07);margin:18px 0"></div>
+
+        <a href="tel:00201158136157" class="clink">
+          <div class="clink-ico" style="background:rgba(0,229,184,.12);border:1px solid rgba(0,229,184,.2)">📞</div>
+          <div><div class="clink-lbl">Mobile</div><div class="clink-val" style="color:var(--t0)">+20 115 813 6157</div></div>
+        </a>
+
+        <a href="https://wa.me/201158136157" target="_blank" class="clink" style="border-color:rgba(37,211,102,.2)">
+          <div class="clink-ico" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.25)">💬</div>
+          <div><div class="clink-lbl">WhatsApp</div><div class="clink-val" style="color:#25d366">+20 115 813 6157</div></div>
+          <div style="margin-left:auto;font-size:10px;color:var(--t3)">Open ›</div>
+        </a>
+
+        <a href="mailto:helbanna184@gmail.com" class="clink">
+          <div class="clink-ico" style="background:rgba(90,163,255,.12);border:1px solid rgba(90,163,255,.22)">✉️</div>
+          <div><div class="clink-lbl">Email</div><div class="clink-val" style="color:var(--blue)">helbanna184@gmail.com</div></div>
+          <div style="margin-left:auto;font-size:10px;color:var(--t3)">Open ›</div>
+        </a>
+      </div>
+
+      <div class="card">
+        <div class="sec-lbl">About this tool</div>
+        <div style="font-size:12px;color:var(--t1);line-height:1.9">
+          MRI Protocol Generator is a clinical decision-support tool designed for <strong style="color:var(--t0)">radiologists and MRI technicians</strong>. It provides evidence-based, vendor-aware MRI protocols covering 50+ body regions including Neuro, Spine, MSK, Abdomen, Pelvis, Cardiac, and more.<br><br>
+          For protocol requests, corrections, or collaboration, feel free to get in touch via WhatsApp or email.
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);font-size:10px;color:var(--t3);text-align:center">
+          MRI Protocol Generator &copy; HUSSIEN IBRAHIM ELBANNA <br>
+          RADIOLOGY  TECHNOLOGIST 
+          — All rights reserved
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ===== ORGAN GROUPS =====
+const GROUPS={
+  neuro:{label:"Neuro / Brain",icon:"🧠",items:{"brain-routine":"Brain — Routine","brain-tumor":"Brain — Tumor / Mass","brain-stroke":"Brain — Stroke / Ischemia","brain-mra":"Brain MRA (Aneurysm)","brain-mrv":"Brain MRV","brain-epilepsy":"Brain — Epilepsy","brain-ms":"Brain — MS / Demyelination","brain-infection":"Brain — Infection / Abscess","brain-trauma":"Brain — Trauma / TBI","orbit":"Orbit","petrous":"Petrous / IAC","pns":"PNS / Sinuses","pituitary":"Pituitary / Sella","tmj":"TMJ"}},
+  spine:{label:"Spine",icon:"🦴",items:{"c-spine":"Cervical Spine","t-spine":"Thoracic Spine","l-spine":"Lumbar Spine","s-spine":"Sacrum / Coccyx","whole-spine":"Whole Spine Screening"}},
+  neck:{label:"Head & Neck",icon:"🗣️",items:{"neck-soft":"Neck — Soft Tissue","thyroid":"Thyroid / Parathyroid","salivary":"Salivary Glands","pharynx":"Pharynx / Larynx","brachial":"Brachial Plexus","mra-neck":"Neck MRA / Carotids"}},
+  chest:{label:"Chest",icon:"🫁",items:{"cardiac":"Cardiac MRI","breast":"Breast","chest-mass":"Chest Mass / Lung","mediastinum":"Mediastinum"}},
+  abdomen:{label:"Abdomen",icon:"⭕",items:{"liver":"Liver","pancreas":"Pancreas","kidneys":"Kidneys / Adrenals","mrcp":"MRCP","abdomen-gen":"Abdomen — General","mra-aorta":"Abdominal MRA / Aorta"}},
+  pelvis:{label:"Pelvis",icon:"🔵",items:{"prostate":"Prostate (mpMRI)","uterus":"Uterus / Endometrium","ovaries":"Ovaries / Adnexa","bladder":"Bladder","rectum":"Rectum","pelvis-gen":"Pelvis — General","fetal":"Fetal MRI"}},
+  upper:{label:"MSK — Upper Limb",icon:"💪",items:{"shoulder":"Shoulder","elbow":"Elbow","wrist":"Wrist","hand":"Hand / Fingers"}},
+  lower:{label:"MSK — Lower Limb",icon:"🦵",items:{"hip":"Hip","knee":"Knee","ankle":"Ankle","foot":"Foot / Toes","thigh":"Thigh / Femur","leg":"Leg / Tibia-Fibula"}},
+  msk3:{label:"MSK — Pelvis & Other",icon:"🔗",items:{"si-joints":"SI Joints / Sacroiliac","symphysis":"Pubic Symphysis"}}
+};
+
+// ===== PROTOCOL DATABASE =====
+const DB={
+"brain-routine":{
+  ind:["Routine brain screening","Chronic headache","Dementia / cognitive decline","Dizziness / vertigo","Post-operative check","Pre-surgical planning","Unexplained neurological symptoms"],
+  sug:["Chronic migraine — rule out secondary cause","Alzheimer dementia workup","Post-craniotomy surveillance","Unexplained first seizure episode","Raised ICP papilledema","Encephalopathy workup"],
+  title:"Brain MRI — Routine Protocol",contrast:false,
+  seq:[{n:"T1 MPRAGE 3D",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"3D isotropic, 1mm"},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:""},{n:"FLAIR Axial",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"TI 2500ms"},{n:"DWI b=0,1000",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:""},{n:"SWI / T2*",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Microbleeds, calcification"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:"Midline, corpus callosum"}],
+  special:["ADC Map","MRA (if vascular suspected)"],
+  notes:"Standard 5mm axial slices. FLAIR: periventricular WM lesions. T2*/SWI: microbleeds, cavernomas. MPRAGE 3D: volumetric analysis."
+},
+"brain-tumor":{
+  ind:["Primary brain tumor","Brain metastases","Glioma (low/high grade)","Meningioma","Post-treatment surveillance","Pre-surgical planning","Radiation necrosis vs recurrence"],
+  sug:["Glioblastoma GBM ring-enhancing","Brain metastases from known primary","Meningioma WHO grade","CNS lymphoma PCNSL","Post-radiation necrosis vs progression","Low-grade glioma IDH mutant","Skull base meningioma"],
+  title:"Brain MRI — Tumor Protocol",contrast:true,
+  seq:[{n:"T1 MPRAGE pre-contrast",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"3D baseline"},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:"Peritumoral edema"},{n:"T2 FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Infiltration, edema"},{n:"DWI b=0,1000",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Cellularity, necrosis"},{n:"SWI",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Hemorrhage, calcification"},{n:"Post-Gd T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"Within 5 min"},{n:"Post-Gd T1 Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"5",FOV:"230",nt:""},{n:"Post-Gd T1 Sagittal",pl:"Sagittal",TR:"500",TE:"10",TH:"5",FOV:"230",nt:""},{n:"Post-Gd FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Leptomeningeal spread"}],
+  special:["MR Perfusion DSC (rCBV grading)","MR Spectroscopy 1H-MRS","fMRI eloquent cortex","DTI / Tractography","MR Permeability Ktrans"],
+  notes:"Post-Gd T1 within 5-10min. DSC: rCBV > 1.75 = high grade. Spectroscopy: Cho/NAA > 2 malignant. Post-Gd FLAIR: leptomeningeal carcinomatosis."
+},
+"brain-stroke":{
+  ind:["Acute ischemic stroke","TIA workup","Hemorrhagic stroke","Posterior circulation stroke","Basilar artery occlusion","Wake-up stroke"],
+  sug:["Acute stroke < 4.5h thrombolysis window","TIA same-day urgent workup","Wake-up stroke DWI-FLAIR mismatch","Basilar artery occlusion","PRES posterior reversible encephalopathy","Cerebral venous thrombosis CVT"],
+  title:"Brain MRI — Stroke Protocol",contrast:false,
+  seq:[{n:"DWI b=0,1000",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"FIRST — time critical"},{n:"ADC Map",pl:"Axial",TR:"—",TE:"—",TH:"5",FOV:"230",nt:"Auto from DWI"},{n:"FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"DWI-FLAIR mismatch"},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:""},{n:"SWI / T2* GRE",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Exclude hemorrhage"},{n:"3D TOF MRA",pl:"Axial slab",TR:"25",TE:"4",TH:"1",FOV:"200",nt:"Circle of Willis, LVO"},{n:"T1 Sagittal",pl:"Sagittal",TR:"500",TE:"10",TH:"5",FOV:"230",nt:""}],
+  special:["MR Perfusion PWI (DSC)","Penumbra-Mismatch Map","MRA Neck carotids","Vessel Wall Imaging 3D","MRV (if CVT suspected)"],
+  notes:"TIME CRITICAL — DWI first. DWI(+)/FLAIR(-) = stroke < 4.5h. PWI-DWI mismatch = salvageable penumbra. SWI before thrombolysis. MRA: large vessel occlusion assessment."
+},
+"brain-mra":{
+  ind:["Aneurysm screening","Known aneurysm follow-up","AVM","Intracranial stenosis","Vasculitis","Family history aneurysm","Post-SAH workup"],
+  sug:["Berry aneurysm PCOM / MCA","Unruptured intracranial aneurysm surveillance","AVM Spetzler-Martin grading","Moyamoya disease","Post-SAH aneurysm search","Intracranial atherosclerosis"],
+  title:"Brain MRA — 3D TOF Protocol",contrast:false,
+  seq:[{n:"3D TOF MRA",pl:"Axial slab",TR:"25",TE:"4",TH:"1",FOV:"200",nt:"FA 20°, MOTSA"},{n:"MIP AP projection",pl:"Multi",TR:"—",TE:"—",TH:"—",FOV:"—",nt:""},{n:"MIP Lateral",pl:"Multi",TR:"—",TE:"—",TH:"—",FOV:"—",nt:""},{n:"MIP Oblique projections",pl:"Multi",TR:"—",TE:"—",TH:"—",FOV:"—",nt:"Rotational views"},{n:"T1 MPRAGE",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"Baseline anatomy"},{n:"FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:""},{n:"SWI",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"SAH blood"}],
+  special:["CE-MRA (contrast-enhanced)","4D Flow MRA","Vessel Wall Imaging 3D","Black-Blood MRI"],
+  notes:"3D TOF: slab 40-80mm, 512 matrix. Report: location, max dimension, neck width, parent vessel relationship."
+},
+"brain-mrv":{
+  ind:["Cerebral venous thrombosis","Dural sinus thrombosis","Raised ICP / papilledema","Idiopathic intracranial hypertension","Post-LP headache"],
+  sug:["Sagittal sinus thrombosis","Transverse sinus thrombosis vs hypoplasia","Idiopathic intracranial hypertension IIH","CVT in pregnancy","Cavernous sinus thrombosis"],
+  title:"Brain MRV — Venous Protocol",contrast:false,
+  seq:[{n:"2D TOF MRV",pl:"Axial",TR:"20",TE:"7",TH:"2",FOV:"240",nt:"Perpendicular to sinuses"},{n:"3D PC MRV",pl:"Axial slab",TR:"25",TE:"7",TH:"1",FOV:"240",nt:"Phase contrast"},{n:"FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Edema, infarction"},{n:"SWI",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Sinus susceptibility"},{n:"T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"T1-bright clot"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Venous infarct"}],
+  special:["CE-MRV (gold standard)","Quantitative flow MRV"],
+  notes:"SWI: hypointense signal in sinus = thrombosis. T1 hyperintense clot 3-14 days. CE-MRV: gold standard for complex cases."
+},
+"brain-epilepsy":{
+  ind:["New-onset seizure","Refractory epilepsy","Pre-surgical workup","Temporal lobe epilepsy","Focal epilepsy","Cortical dysplasia"],
+  sug:["Mesial temporal sclerosis MTS","Focal cortical dysplasia FCD","DNET / Ganglioglioma epilepsy tumor","Cavernous malformation epilepsy","Tuberous sclerosis cortical tubers","Hippocampal sclerosis"],
+  title:"Brain MRI — Epilepsy Protocol",contrast:false,
+  seq:[{n:"3D T1 MPRAGE 1mm isotropic",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"Volumetric cortical mapping"},{n:"T2 Coronal Hippocampal 2mm",pl:"Coronal",TR:"4500",TE:"100",TH:"2",FOV:"200",nt:"Perpendicular to HC long axis"},{n:"FLAIR Coronal Hippocampal",pl:"Coronal",TR:"9000",TE:"90",TH:"2",FOV:"200",nt:"HC signal asymmetry"},{n:"FLAIR Axial",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"WM lesions"},{n:"SWI / T2*",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Cavernoma, hemosiderin"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Post-ictal changes"}],
+  special:["T2 Hippocampal volumetry","3D FLAIR isotropic","Arterial Spin Labeling ASL","Double Inversion Recovery DIR"],
+  notes:"Dedicated hippocampal: coronal PERPENDICULAR to long axis, 2mm no gap. MTS: T2 hyperintense + volume loss. FCD: blurred GM-WM junction."
+},
+"brain-ms":{
+  ind:["Multiple sclerosis","CIS clinically isolated syndrome","Demyelination","NMOSD","ADEM","Progressive MS monitoring"],
+  sug:["First demyelinating episode CIS","Active relapse in known MS","NMOSD anti-AQP4 positive","ADEM acute disseminated encephalomyelitis","Tumefactive MS","Primary progressive MS ppMS"],
+  title:"Brain MRI — MS / Demyelination Protocol",contrast:true,
+  seq:[{n:"T1 MPRAGE 3D",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"3D isotropic"},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:"Lesion burden"},{n:"FLAIR 3D isotropic",pl:"Axial",TR:"9000",TE:"90",TH:"1",FOV:"256",nt:"Juxtacortical, periventricular"},{n:"T1 Black Holes",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"Axonal loss"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Acute vs chronic"},{n:"Post-Gd T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"Active Gd+ lesions"},{n:"Post-Gd T1 Sagittal",pl:"Sagittal",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"Dawson fingers"}],
+  special:["Cervical + Thoracic spine MRI","Magnetization Transfer Ratio MTR","DTI normal-appearing WM","Double Inversion Recovery DIR"],
+  notes:"McDonald 2017: DIS + DIT (Gd+ and Gd- simultaneously). 3D FLAIR: juxtacortical lesions. ALWAYS add spine for complete workup."
+},
+"brain-infection":{
+  ind:["Brain abscess","Meningitis","Encephalitis","HIV opportunistic infection","Tuberculoma","Toxoplasmosis","Subdural empyema"],
+  sug:["Pyogenic brain abscess","Toxoplasma vs CNS lymphoma HIV+","HSV encephalitis temporal lobe","TB meningitis / tuberculoma","Cryptococcal meningitis","Neurocysticercosis","Subdural empyema"],
+  title:"Brain MRI — Infection Protocol",contrast:true,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:""},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:""},{n:"FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Meningeal inflammation"},{n:"DWI b=0,1000",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Abscess restricted diffusion"},{n:"SWI",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"Microhemorrhage"},{n:"Post-Gd T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"230",nt:"Rim / meningeal enhancement"},{n:"Post-Gd T1 Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"5",FOV:"230",nt:""},{n:"Post-Gd FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Leptomeningeal spread"}],
+  special:["MR Spectroscopy abscess amino acids","MRA (mycotic aneurysm)","DWI non-EPI"],
+  notes:"DWI CRITICAL: abscess = restricted. HSV: FLAIR/T2 mesial temporal + insular. Toxoplasma: eccentric target sign. Tuberculoma: T2-dark center (caseation)."
+},
+"brain-trauma":{
+  ind:["TBI traumatic brain injury","Diffuse axonal injury","Subdural hematoma","Epidural hematoma","Contusion","Post-traumatic","Shaken baby"],
+  sug:["Diffuse axonal injury DAI","Acute subdural hematoma","Chronic subdural hematoma","Epidural hematoma","Contrecoup contusion","Post-traumatic epilepsy MRI","Shaken baby syndrome"],
+  title:"Brain MRI — Trauma / TBI Protocol",contrast:false,
+  seq:[{n:"T1 MPRAGE 3D",pl:"Axial",TR:"2300",TE:"2.3",TH:"1",FOV:"256",nt:"Anatomy, hematoma"},{n:"T2 TSE",pl:"Axial",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:""},{n:"FLAIR",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Extra-axial collections"},{n:"SWI",pl:"Axial",TR:"27",TE:"20",TH:"2",FOV:"230",nt:"DAI microbleeds — primary"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Cytotoxic edema, DAI"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4500",TE:"100",TH:"5",FOV:"230",nt:"Corpus callosum DAI"}],
+  special:["DTI Tractography (white matter tracts)","MR Spectroscopy (NAA)","Susceptibility Weighted Imaging 3D"],
+  notes:"SWI: most sensitive for DAI microbleeds at grey-white junction, corpus callosum, brainstem. DTI: white matter tract integrity. Chronic TBI: volume loss, hemosiderin deposits."
+},
+"orbit":{
+  ind:["Optic nerve lesion","Orbital mass","Proptosis","Visual loss / optic neuritis","Graves ophthalmopathy","Orbital cellulitis","Lacrimal gland mass"],
+  sug:["Optic neuritis MS related","Graves thyroid eye disease TED","Orbital cavernous hemangioma","Retinoblastoma child","Orbital pseudotumor IgG4","Orbital lymphoma","Optic nerve sheath meningioma","Orbital cellulitis with abscess"],
+  title:"Orbit MRI Protocol",contrast:true,
+  seq:[{n:"T1 Axial small FOV",pl:"Axial",TR:"500",TE:"10",TH:"3",FOV:"160",nt:"3mm, FOV 16cm"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"90",TH:"3",FOV:"160",nt:"Optic nerve signal"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"160",nt:"Bilateral orbit comparison"},{n:"T1 Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"3",FOV:"160",nt:"Extraocular muscles"},{n:"T2 Sagittal orbital",pl:"Sagittal",TR:"4000",TE:"90",TH:"3",FOV:"160",nt:"Optic nerve length"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"500",TE:"10",TH:"3",FOV:"160",nt:"Enhancement pattern"},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"3",FOV:"160",nt:""},{n:"DWI orbital",pl:"Axial",TR:"5000",TE:"80",TH:"4",FOV:"200",nt:"Lymphoma vs cellulitis"}],
+  special:["3D VIBE post-contrast","DTI optic nerve tractography","Brain survey sequences"],
+  notes:"FOV 14-16cm. 3mm slices. Fat suppression essential. Compare both orbits. Optic neuritis: T2 hyperintense + enhancement. Graves: enlarged EOM inferior > medial > superior."
+},
+"petrous":{
+  ind:["Sensorineural hearing loss","Tinnitus","Acoustic neuroma","IAC mass","Cholesteatoma","Facial nerve palsy","Vertigo"],
+  sug:["Vestibular schwannoma acoustic neuroma","Bilateral acoustic NF2","Sudden SNHL","Acquired cholesteatoma","Facial nerve schwannoma","Superior canal dehiscence","Cochlear otosclerosis"],
+  title:"IAC / Petrous Bone MRI Protocol",contrast:true,
+  seq:[{n:"3D CISS / FIESTA",pl:"Axial",TR:"6",TE:"3",TH:"0.7",FOV:"180",nt:"Sub-mm inner ear"},{n:"T2 TSE Axial",pl:"Axial",TR:"4000",TE:"90",TH:"3",FOV:"200",nt:"IAC contents"},{n:"T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"3",FOV:"200",nt:"Pre-Gd baseline"},{n:"Post-Gd T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"3",FOV:"200",nt:"Neural enhancement"},{n:"Post-Gd T1 Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"3",FOV:"200",nt:"Facial nerve course"},{n:"DWI non-EPI",pl:"Axial",TR:"5000",TE:"80",TH:"4",FOV:"200",nt:"Cholesteatoma restricted"},{n:"FLAIR Axial brain",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Brain survey"}],
+  special:["3D DRIVE / SPACE heavily T2","MR Cisternography","High-res 3D post-Gd"],
+  notes:"3D CISS: cochlea, semicircular canals, 8th nerve branches. Non-EPI DWI: cholesteatoma = restricted. Schwannoma: enhancing mass in IAC fundus."
+},
+"pns":{
+  ind:["Chronic sinusitis","Sinonasal mass","Pre-op FESS planning","Inverted papilloma","Sinonasal malignancy","Fungal sinusitis"],
+  sug:["Chronic rhinosinusitis pre-FESS","Inverted papilloma Krouse staging","Esthesioneuroblastoma Kadish","Sinonasal squamous cell carcinoma","Allergic fungal sinusitis AFS","Juvenile nasopharyngeal angiofibroma"],
+  title:"PNS / Sinonasal MRI Protocol",contrast:true,
+  seq:[{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"90",TH:"4",FOV:"220",nt:"Primary sinus anatomy"},{n:"T1 Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"4",FOV:"220",nt:"Fat planes, bone"},{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"4",FOV:"220",nt:""},{n:"T1 Axial",pl:"Axial",TR:"500",TE:"10",TH:"4",FOV:"220",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"220",nt:"Perineural spread"},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"4",FOV:"220",nt:"Enhancement pattern"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"500",TE:"10",TH:"4",FOV:"220",nt:"Skull base, intracranial"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"220",nt:"Mucocele vs abscess"}],
+  special:["3D T1 VIBE post-contrast","Skull base extension MR"],
+  notes:"Coronal primary for sinus anatomy. T2: secretion bright vs tumor intermediate. Inverted papilloma: convoluted cerebriform pattern on T2."
+},
+"pituitary":{
+  ind:["Pituitary adenoma","Microadenoma vs macroadenoma","Cushing disease","Acromegaly","Prolactinoma","Visual field defect","Empty sella","Craniopharyngioma"],
+  sug:["Prolactinoma hyperprolactinaemia","ACTH microadenoma Cushing disease","GH-secreting macroadenoma acromegaly","Pituitary incidentaloma","Bitemporal hemianopia chiasm compression","Empty sella syndrome","Craniopharyngioma suprasellar","Pituitary apoplexy"],
+  title:"Pituitary / Sella MRI Protocol",contrast:true,
+  seq:[{n:"T1 Coronal thin 2mm",pl:"Coronal",TR:"500",TE:"10",TH:"2",FOV:"200",nt:"High-res sella"},{n:"T2 Coronal thin 2mm",pl:"Coronal",TR:"4000",TE:"90",TH:"2",FOV:"200",nt:"Microadenoma T2-bright"},{n:"T1 Sagittal",pl:"Sagittal",TR:"500",TE:"10",TH:"3",FOV:"200",nt:"Stalk, infundibulum"},{n:"FLAIR Axial brain",pl:"Axial",TR:"9000",TE:"90",TH:"5",FOV:"230",nt:"Brain survey"},{n:"Dynamic T1 Coronal Gd",pl:"Coronal",TR:"250",TE:"3",TH:"3",FOV:"200",nt:"Every 30s x 6 phases"},{n:"Post-Gd T1 Coronal delayed",pl:"Coronal",TR:"500",TE:"10",TH:"2",FOV:"200",nt:"10 min delayed"},{n:"Post-Gd T1 Sagittal",pl:"Sagittal",TR:"500",TE:"10",TH:"3",FOV:"200",nt:"Stalk deviation"}],
+  special:["Dynamic perfusion pituitary","Cavernous sinus T2 evaluation"],
+  notes:"CRITICAL: Dynamic contrast essential for microadenoma. Microadenoma enhances LATER than gland (delayed washout). Coronal 2mm primary. Macroadenoma: chiasm compression, cavernous sinus invasion."
+},
+"tmj":{
+  ind:["TMJ pain","Disc displacement","Joint dysfunction","Arthritis","Condylar abnormality"],
+  sug:["TMJ disc displacement with reduction","TMJ disc displacement without reduction","Anterior disc displacement","TMJ osteoarthritis","Condylar hyperplasia"],
+  title:"TMJ MRI Protocol",contrast:false,
+  seq:[{n:"PD Sagittal closed mouth",pl:"Sagittal",TR:"2000",TE:"30",TH:"3",FOV:"120",nt:"Bilateral, small FOV"},{n:"PD Sagittal open mouth",pl:"Sagittal",TR:"2000",TE:"30",TH:"3",FOV:"120",nt:"Dynamic disc position"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"3",FOV:"120",nt:"Condyle morphology"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"90",TH:"3",FOV:"120",nt:"Joint effusion"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"120",nt:"Marrow edema condyle"}],
+  special:["Dynamic cine MRI open-close","Kinematic study"],
+  notes:"Bilateral simultaneous imaging. Sagittal oblique perpendicular to condylar long axis. DDwR: anterior displacement reduces on opening."
+},
+"c-spine":{
+  ind:["Cervical disc herniation","Myelopathy","Radiculopathy","Cervical stenosis","Neck pain","Trauma","Tumor","Infection","Post-operative"],
+  sug:["C5-C6 disc herniation with myelopathy","Cervical foraminal stenosis radiculopathy","Atlantoaxial subluxation RA","Post-ACDF assessment","Cervical cord contusion","Epidural abscess cervical"],
+  title:"Cervical Spine MRI Protocol",contrast:false,
+  seq:[{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"3",FOV:"280",nt:"Cord anatomy, disc"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"3",FOV:"280",nt:"Primary cord, discs, CSF"},{n:"STIR Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"280",nt:"Marrow / cord edema"},{n:"T2 Axial per disc",pl:"Axial",TR:"4000",TE:"100",TH:"3",FOV:"180",nt:"C3-T1 angled to disc"},{n:"T1 Axial",pl:"Axial",TR:"700",TE:"15",TH:"3",FOV:"180",nt:"Foraminal stenosis"},{n:"GRE / MEDIC Axial",pl:"Axial",TR:"600",TE:"14",TH:"3",FOV:"180",nt:"Cord signal, osteophytes"}],
+  special:["Post-Gd T1 tumor / infection / post-op","Dynamic Flexion-Extension instability","3D isotropic T2","Phase contrast CSF flow"],
+  notes:"Axial slices parallel to each disc space C3-T1. GRE/MEDIC: superior foraminal stenosis and cord signal. Add Gd: infection, tumor, post-op, demyelination."
+},
+"t-spine":{
+  ind:["Thoracic disc","Cord compression","Myelopathy","Tumor / metastasis","Demyelination","Transverse myelitis","Vascular malformation"],
+  sug:["Thoracic disc herniation","Epidural metastasis cord compression","MS thoracic plaques","Transverse myelitis NMO / MOGAD","Dural AVM spinal","Pott disease thoracic"],
+  title:"Thoracic Spine MRI Protocol",contrast:false,
+  seq:[{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"3",FOV:"380",nt:"Full thoracic cord"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"3",FOV:"380",nt:""},{n:"STIR Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"380",nt:"Marrow edema"},{n:"T2 Axial symptomatic levels",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"220",nt:""}],
+  special:["Post-Gd T1 MS / tumor","Spinal MRA dural AVM","Phase contrast CSF flow","Cardiac gating upper thoracic"],
+  notes:"Large FOV sagittal for full thoracic cord. Demyelination: Gd shows active plaques. Dural AVM: spinal MRA + DSA. Cardiac gating for upper thoracic."
+},
+"l-spine":{
+  ind:["Lumbar disc herniation","Lumbar stenosis","Back pain","Radiculopathy / sciatica","Cauda equina syndrome","Spondylolisthesis","Tumor / metastasis","Infection","Post-operative"],
+  sug:["L4-L5 disc herniation","L5-S1 disc prolapse sequestration","Cauda equina syndrome EMERGENCY","Central canal stenosis","Spondylolisthesis L4-5","Vertebral metastasis","Lumbar discitis osteomyelitis","Post-discectomy scar vs recurrence"],
+  title:"Lumbar Spine MRI Protocol",contrast:false,
+  seq:[{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"4",FOV:"300",nt:"Disc, marrow, fat planes"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"300",nt:"Primary discs, cord, thecal"},{n:"STIR Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"4",FOV:"300",nt:"Marrow edema, infection"},{n:"T2 Axial L3-S1",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"200",nt:"Angled to each disc space"}],
+  special:["Post-Gd T1 post-op / tumor / infection","DWI Sagittal benign vs malignant fracture","Whole spine STIR staging"],
+  notes:"Axial PARALLEL to each disc L3-S1. Post-Gd: post-op scar vs disc; infection — disc + endplate enhancement; tumor. DWI: malignant fracture = restricted."
+},
+"s-spine":{
+  ind:["Sacral fracture","Sacral tumor","Sacral nerve root compression","Tarlov cysts","SI joint pathology"],
+  sug:["Sacral insufficiency fracture","Sacral chordoma","Perineural Tarlov cysts","Denis zone fracture","Sacral nerve root compression"],
+  title:"Sacrum / Coccyx MRI Protocol",contrast:false,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"700",TE:"15",TH:"4",FOV:"300",nt:"Both sacral alae"},{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"300",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"350",nt:"Marrow edema primary"},{n:"T1 Coronal",pl:"Coronal",TR:"700",TE:"15",TH:"4",FOV:"350",nt:"Fracture line"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"300",nt:"Coccyx, sacral canal"}],
+  special:["Post-Gd T1 FS tumor / infection","DWI metastasis"],
+  notes:"STIR coronal: H-shaped sacral insufficiency fracture. Chordoma: T2 very bright, midline. Tarlov cysts: T2 bright, follows CSF signal."
+},
+"whole-spine":{
+  ind:["Metastatic disease","Multiple myeloma","Leptomeningeal carcinomatosis","Unknown level cord compression"],
+  sug:["Vertebral metastases staging","Multiple myeloma spine","Leptomeningeal carcinomatosis","Ankylosing spondylitis whole spine"],
+  title:"Whole Spine MRI — Screening Protocol",contrast:false,
+  seq:[{n:"STIR Sagittal whole spine",pl:"Sagittal",TR:"4000",TE:"60",TH:"4",FOV:"500",nt:"C to sacrum, 2 stations"},{n:"T1 Sagittal whole spine",pl:"Sagittal",TR:"700",TE:"15",TH:"4",FOV:"500",nt:"2 stations overlap"},{n:"T2 Sagittal symptomatic region",pl:"Sagittal",TR:"4000",TE:"100",TH:"3",FOV:"300",nt:"Detailed region"},{n:"DWI whole spine",pl:"Sagittal",TR:"5000",TE:"80",TH:"5",FOV:"500",nt:"Malignant vs benign"}],
+  special:["Post-Gd T1 whole spine leptomeningeal","CT correlation bony detail"],
+  notes:"2-3 stations sagittal with overlap. STIR: most sensitive for marrow pathology. DWI: malignant = restricted. Post-Gd: leptomeningeal mets."
+},
+"neck-soft":{
+  ind:["Neck mass","Lymphadenopathy","Salivary gland mass","Parapharyngeal mass","Neck abscess","Post-treatment surveillance"],
+  sug:["Cervical lymphadenopathy malignant vs reactive","Parapharyngeal space mass","Carotid body paraganglioma","Deep space neck abscess","SCC nodal staging","Thyroglossal duct cyst","Branchial cleft cyst"],
+  title:"Neck Soft Tissue MRI Protocol",contrast:true,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"220",nt:"Fat planes, space anatomy"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"90",TH:"4",FOV:"220",nt:"Primary lesion"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"280",nt:"Nodal survey"},{n:"T1 Sagittal",pl:"Sagittal",TR:"600",TE:"12",TH:"4",FOV:"220",nt:""},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"220",nt:"Enhancement pattern"},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"4",FOV:"280",nt:"Nodal enhancement"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"220",nt:"Malignant vs reactive nodes"}],
+  special:["MRA neck vascular","CE-MRA carotid"],
+  notes:"Skull base to thoracic inlet. DWI: malignant nodes ADC < 0.9. Post-Gd: abscess rim enhancement. Paraganglioma: salt-and-pepper, avid enhancement."
+},
+"thyroid":{
+  ind:["Thyroid mass","Substernal goiter","Thyroid cancer staging","Parathyroid adenoma","Hyperparathyroidism localization"],
+  sug:["Large substernal goiter airway","Thyroid cancer local invasion","Parathyroid adenoma localization","Multinodular goiter pre-op","Recurrent laryngeal nerve involvement"],
+  title:"Thyroid / Parathyroid MRI Protocol",contrast:true,
+  seq:[{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"4",FOV:"220",nt:"Primary gland morphology"},{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"220",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"280",nt:"Substernal extent"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"90",TH:"4",FOV:"280",nt:""},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"220",nt:""},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"220",nt:"Malignant nodule"}],
+  special:["MRA vascular displacement","Parathyroid 4D CT preferred for localization"],
+  notes:"MRI for substernal extent, local invasion, recurrence. Parathyroid: T2 bright nodule posterior to thyroid lobe. 4D CT often preferred for parathyroid localization pre-op."
+},
+"salivary":{
+  ind:["Parotid mass","Submandibular mass","Salivary gland tumor","Sjogren syndrome","Sialadenitis","Ductal calculus"],
+  sug:["Pleomorphic adenoma parotid","Warthin tumor parotid","Mucoepidermoid carcinoma","Parotid deep lobe mass","Sjogren syndrome parotid","Salivary duct calculus"],
+  title:"Salivary Glands MRI Protocol",contrast:true,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"200",nt:"Both parotids"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"90",TH:"4",FOV:"200",nt:""},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"4",FOV:"200",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"200",nt:""},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"200",nt:"Enhancement"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"200",nt:"Malignancy ADC"}],
+  special:["MR Sialography Stenson/Wharton duct","Facial nerve tracking 3D"],
+  notes:"Pleomorphic adenoma: T2 very bright. Warthin: T1 bright cystic, bilateral 10%. Malignancy: low ADC, irregular margins, facial nerve invasion."
+},
+"pharynx":{
+  ind:["Pharyngeal mass","Laryngeal cancer","Nasopharyngeal carcinoma","Base of tongue tumor","Hypopharynx lesion"],
+  sug:["Nasopharyngeal carcinoma NPC staging","Laryngeal squamous cell carcinoma","Base of tongue SCC HPV+","Hypopharynx pyriform sinus cancer","Retropharyngeal abscess"],
+  title:"Pharynx / Larynx MRI Protocol",contrast:true,
+  seq:[{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"4",FOV:"200",nt:"Primary lesion"},{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"200",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"280",nt:"Nodal survey"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"4",FOV:"200",nt:"Enhancement"},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"4",FOV:"280",nt:"Nodes"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"200",nt:"Tumor vs nodes"}],
+  special:["Skull base extension","MR Laryngography"],
+  notes:"Axial slices from skull base to supraclavicular nodes. NPC: Rouviere node, skull base involvement. Larynx: subglottic extension and cartilage invasion."
+},
+"brachial":{
+  ind:["Brachial plexus injury","Cervical rib","Thoracic outlet syndrome","Plexitis","Tumor infiltration","Post-radiation plexopathy"],
+  sug:["Brachial plexus avulsion trauma","Parsonage-Turner syndrome neuralgic amyotrophy","Pancoast tumor plexus invasion","Post-radiation plexopathy vs recurrence","Cervical rib TOS","Metastatic plexus infiltration"],
+  title:"Brachial Plexus MRI Protocol",contrast:false,
+  seq:[{n:"T2 STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"380",nt:"Full plexus C5-T1"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"4",FOV:"380",nt:"Anatomy, fat planes"},{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"300",nt:"Nerve roots, scalene"},{n:"3D STIR SPACE Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"1",FOV:"380",nt:"3D isotropic plexus"},{n:"DWI",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"300",nt:"Nerve signal"}],
+  special:["Post-Gd T1 FS tumor/neuritis","MR Neurography 3D","DTI tractography"],
+  notes:"STIR coronal: C5-T1 nerve roots through trunk divisions. 3D STIR SPACE: reformats in any plane. Avulsion: pseudomeningocele on myelogram-T2. Pancoast: superior sulcus tumor and plexus relationship."
+},
+"mra-neck":{
+  ind:["Carotid stenosis","Carotid dissection","Vertebral artery dissection","Fibromuscular dysplasia","Carotid body tumor"],
+  sug:["Carotid artery stenosis NASCET","Internal carotid artery dissection","Vertebral artery dissection","Fibromuscular dysplasia FMD beads","Carotid body paraganglioma","Subclavian steal syndrome"],
+  title:"Neck MRA — Carotid / Vertebral Protocol",contrast:true,
+  seq:[{n:"CE-MRA 3D neck",pl:"Coronal",TR:"3.5",TE:"1.2",TH:"1",FOV:"400",nt:"Contrast-enhanced gold standard"},{n:"MIP projections",pl:"Multi",TR:"—",TE:"—",TH:"—",FOV:"—",nt:"AP, lateral, obliques"},{n:"T1 FS Axial pre-Gd",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"220",nt:"Dissection crescent sign"},{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"220",nt:""},{n:"TOF MRA 2D neck",pl:"Axial",TR:"20",TE:"7",TH:"3",FOV:"200",nt:"Non-contrast if Gd contraindicated"},{n:"DWI brain",pl:"Axial",TR:"5000",TE:"80",TH:"5",FOV:"230",nt:"Embolic infarction"}],
+  special:["Black Blood MRI plaque","Vessel Wall Imaging 3D","4D MRA flow dynamics","Carotid plaque T1 FS hemorrhage"],
+  notes:"CE-MRA: aortic arch to Circle of Willis. Dissection: T1 FS crescent of methemoglobin. FMD: string-of-beads. Carotid plaque T1 bright = intraplaque hemorrhage."
+},
+"cardiac":{
+  ind:["Cardiomyopathy","Myocarditis","LGE viability","Congenital heart disease","Cardiac mass","Pericardial disease","Valve assessment"],
+  sug:["Dilated cardiomyopathy DCM","Hypertrophic cardiomyopathy HCM","Acute myocarditis","Cardiac amyloidosis","ARVC / ARVD","Cardiac sarcoidosis","Non-compaction LVNC","Pericardial constriction","Atrial myxoma"],
+  title:"Cardiac MRI (CMR) Protocol",contrast:true,
+  seq:[{n:"Scout 3-plane",pl:"Multi",TR:"3",TE:"1.5",TH:"8",FOV:"400",nt:"ECG-gated localizer"},{n:"SSFP Cine 4-chamber",pl:"Axial",TR:"40",TE:"1.5",TH:"8",FOV:"380",nt:"ECG-gated BH"},{n:"SSFP Cine 2-chamber",pl:"Sagittal",TR:"40",TE:"1.5",TH:"8",FOV:"380",nt:""},{n:"SSFP Cine LVOT",pl:"Axial",TR:"40",TE:"1.5",TH:"8",FOV:"380",nt:"Aortic valve"},{n:"SSFP Cine SA stack",pl:"Axial",TR:"40",TE:"1.5",TH:"8",FOV:"380",nt:"EF, volumes, mass"},{n:"T2 STIR myocardial edema",pl:"Axial",TR:"800",TE:"60",TH:"8",FOV:"380",nt:"Myocarditis / acute MI"},{n:"T1 MOLLI mapping pre-Gd",pl:"Axial",TR:"280",TE:"1",TH:"8",FOV:"380",nt:"Native T1"},{n:"LGE PSIR 3D",pl:"Multi",TR:"6",TE:"3",TH:"8",FOV:"380",nt:"10-15min post-Gd, TI scout"},{n:"T1 MOLLI mapping post-Gd",pl:"Axial",TR:"280",TE:"1",TH:"8",FOV:"380",nt:"ECV calculation"}],
+  special:["T2* mapping iron overload","Phase contrast valve quantification","4D Flow","Perfusion stress/rest","ECV quantification"],
+  notes:"ECG-gating mandatory. Breath-hold each acquisition. LGE 10-15min post-Gd with TI scout first. Ischemic: subendocardial LGE. Myocarditis: mid-wall/epicardial lateral. Amyloid: diffuse subendocardial."
+},
+"breast":{
+  ind:["High-risk screening","Cancer staging extent","Neoadjuvant chemotherapy response","Implant assessment","Unknown primary axillary node","Nipple discharge"],
+  sug:["BRCA1/2 carrier high-risk screening","Pre-op breast cancer extent staging","NAC response monitoring","Silicone implant intracapsular rupture","Occult breast primary axillary mets","Dense breast supplemental screening"],
+  title:"Breast MRI Protocol",contrast:true,
+  seq:[{n:"T1 Bilateral Axial pre",pl:"Axial",TR:"600",TE:"10",TH:"3",FOV:"340",nt:"Pre-contrast baseline"},{n:"T2 Fat Sat Bilateral",pl:"Axial",TR:"4000",TE:"90",TH:"3",FOV:"340",nt:"Cyst vs solid, edema"},{n:"STIR Bilateral",pl:"Axial",TR:"4000",TE:"60",TH:"3",FOV:"340",nt:"Skin edema"},{n:"3D T1 GRE pre-Gd",pl:"Axial",TR:"5",TE:"2.5",TH:"1.5",FOV:"340",nt:"High-res 3D reference"},{n:"3D T1 GRE post-Gd x5",pl:"Axial",TR:"5",TE:"2.5",TH:"1.5",FOV:"340",nt:"Every 90s kinetic curve"},{n:"DWI Bilateral",pl:"Axial",TR:"5000",TE:"65",TH:"4",FOV:"340",nt:"ADC < 1.3 suspicious"}],
+  special:["Subtraction images post-pre","Kinetic curve analysis washout","MIP reconstruction","MRI-guided vacuum biopsy"],
+  notes:"Prone bilateral breast coil. Day 7-14 menstrual cycle. Subtraction: post-pre Gd. Kinetic washout = malignant. ADC < 1.3x10-3 mm2/s suspicious."
+},
+"chest-mass":{
+  ind:["Chest mass characterization","Lung tumor staging","Pleural mass","Mediastinal mass","Chest wall mass"],
+  sug:["Superior sulcus Pancoast tumor","Anterior mediastinal mass thymoma","Pleural mesothelioma","Chest wall sarcoma","Neurogenic tumor posterior mediastinum"],
+  title:"Chest MRI — Mass Protocol",contrast:true,
+  seq:[{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"380",nt:"Primary lesion"},{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"380",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"5",FOV:"420",nt:"Full chest survey"},{n:"DWI",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"380",nt:"Malignancy"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"380",nt:"Enhancement"},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"5",FOV:"420",nt:"Extent"}],
+  special:["Dynamic contrast MRI","MRA pulmonary vessels","Respiratory gating"],
+  notes:"Respiratory gating or breath-hold. T2 FS: distinguish fluid from solid. Pancoast: brachial plexus and subclavian vessel involvement. Thymoma: encapsulated vs invasive."
+},
+"mediastinum":{
+  ind:["Anterior mediastinal mass","Thymoma","Lymphoma mediastinum","Germ cell tumor","Vascular mediastinal lesion"],
+  sug:["Thymoma Masaoka staging","Mediastinal lymphoma staging","Anterior mediastinal teratoma","Mediastinal cyst characterization","Thymic carcinoma","Pericardial cyst"],
+  title:"Mediastinum MRI Protocol",contrast:true,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"380",nt:""},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"380",nt:"Cyst vs solid"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"5",FOV:"420",nt:"Full mediastinum"},{n:"DWI",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"380",nt:"Lymphoma restriction"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"380",nt:"Enhancement pattern"}],
+  special:["Chemical shift imaging fat/water","Cardiac gating vascular structures"],
+  notes:"T1 In/Out-of-phase: fat content assessment. Thymic lesions: young < 40 = thymoma more likely. Cyst: T2 very bright, no enhancement. Lymphoma: DWI restricted, avid enhancement."
+},
+"liver":{
+  ind:["Liver lesion characterization","HCC in cirrhosis","Colorectal metastases","Hepatic adenoma","FNH","Hemangioma","Cholangiocarcinoma","Cirrhosis staging"],
+  sug:["HCC cirrhotic liver LI-RADS 5","Colorectal liver metastases","Hepatic adenoma oral contraceptive","FNH focal nodular hyperplasia","Giant hemangioma characterization","Intrahepatic cholangiocarcinoma","Incidental liver lesion","Hypervascular liver lesion"],
+  title:"Liver MRI — Multiphasic Protocol",contrast:true,
+  seq:[{n:"T1 In-Phase GRE",pl:"Axial",TR:"150",TE:"2.4",TH:"5",FOV:"380",nt:"TE 2.4ms 1.5T / 1.2ms 3T"},{n:"T1 Out-of-Phase GRE",pl:"Axial",TR:"150",TE:"1.2",TH:"5",FOV:"380",nt:"Fat signal dropout"},{n:"T2 HASTE breath-hold",pl:"Axial",TR:"1200",TE:"90",TH:"5",FOV:"380",nt:"Cyst vs solid"},{n:"T2 TSE Fat Sat",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"380",nt:"Hemangioma very bright"},{n:"DWI b=50,400,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"380",nt:"ADC map"},{n:"3D T1 GRE pre-Gd VIBE",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"Subtraction reference"},{n:"Dynamic Arterial phase",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"Bolus-track 18-25s"},{n:"Dynamic Portal venous",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"60-70s post-injection"},{n:"Dynamic Delayed",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"3-5 min"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"90",TH:"5",FOV:"400",nt:"Survey, biliary"}],
+  special:["Hepatobiliary phase Primovist 20min","MRCP","DWI high b-value b=1000","MR Elastography fibrosis","LI-RADS v2018 scoring"],
+  notes:"BREATH-HOLD sequences. Arterial bolus-track aorta 18-25s. LI-RADS: APHE + washout + capsule = LR-5 HCC. Primovist hepatobiliary 20min: non-functioning lesions dark. Hemangioma: peripheral nodular centripetal fill."
+},
+"pancreas":{
+  ind:["Pancreatic mass","PDAC staging","IPMN","Pancreatitis","Pancreatic NET","Autoimmune pancreatitis","Pancreatic cyst"],
+  sug:["Pancreatic ductal adenocarcinoma PDAC","IPMN side-branch vs main duct","Pancreatic neuroendocrine tumor PNET","Autoimmune pancreatitis IgG4","Serous cystadenoma","Mucinous cystic neoplasm","Solid pseudopapillary tumor SPT","Groove pancreatitis"],
+  title:"Pancreas MRI Protocol",contrast:true,
+  seq:[{n:"T1 Fat Sat GRE pre",pl:"Axial",TR:"150",TE:"2.5",TH:"4",FOV:"360",nt:"Pancreas T1 bright normally"},{n:"T2 HASTE",pl:"Axial",TR:"1200",TE:"90",TH:"5",FOV:"360",nt:"Cystic components"},{n:"T2 Fat Sat",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"360",nt:""},{n:"DWI b=0,50,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"360",nt:"Restricted = PDAC"},{n:"3D MRCP",pl:"Coronal",TR:"3500",TE:"700",TH:"1.5",FOV:"300",nt:"Duct anatomy"},{n:"Dynamic Arterial",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"360",nt:"PNET hypervascular"},{n:"Dynamic Portal",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"360",nt:"PDAC hypovascular"},{n:"Dynamic Delayed",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"360",nt:""}],
+  special:["Secretin MRCP ductal communication","MRA portal/SMA vascular involvement"],
+  notes:"PDAC: hypovascular, low T1. PNET: hypervascular arterial. IPMN: MRCP for duct communication. Vascular: SMA, celiac, SMV, portal vein resectability."
+},
+"kidneys":{
+  ind:["Renal mass characterization","RCC staging","Angiomyolipoma","Complex cyst Bosniak","Renal vein thrombosis","Adrenal mass","Pheochromocytoma"],
+  sug:["RCC clear cell vs papillary vs chromophobe","Angiomyolipoma vs RCC","Bosniak IIF / III cyst","Adrenal adenoma vs mets washout","Pheochromocytoma adrenal","Renal oncocytoma","VHL syndrome renal lesions"],
+  title:"Kidneys / Adrenals MRI Protocol",contrast:true,
+  seq:[{n:"T1 In/Out Phase GRE",pl:"Axial",TR:"150",TE:"2.4",TH:"5",FOV:"380",nt:"Adrenal signal dropout"},{n:"T2 HASTE",pl:"Axial",TR:"1200",TE:"90",TH:"5",FOV:"380",nt:"Cyst vs solid"},{n:"T2 Fat Sat",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"380",nt:""},{n:"DWI b=0,400,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"380",nt:"ADC map"},{n:"3D GRE pre-Gd",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:""},{n:"Dynamic Corticomedullary",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"30-40s"},{n:"Dynamic Nephrographic",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"90s"},{n:"Dynamic Excretory",pl:"Coronal",TR:"3.5",TE:"1.7",TH:"3",FOV:"400",nt:"3-5min"}],
+  special:["MRA renal arteries","MR Urography MRU","Chemical shift adrenal"],
+  notes:"Adrenal adenoma: signal dropout > 20% out-of-phase. Pheochromocytoma: T2 very bright lightbulb. RCC: corticomedullary phase best. Bosniak III/IV = surgery."
+},
+"mrcp":{
+  ind:["CBD stone","Biliary obstruction","PSC","Cholangiocarcinoma","Pancreatic duct dilation","IPMN","Post-ERCP complication"],
+  sug:["CBD stone pre-ERCP","Primary sclerosing cholangitis PSC","Klatskin tumor hilar cholangiocarcinoma","Main duct IPMN","Side-branch IPMN","Pancreatic divisum","Choledochal cyst Todani","Post-cholecystectomy bile leak"],
+  title:"MRCP Protocol",contrast:false,
+  seq:[{n:"T2 HASTE Coronal survey",pl:"Coronal",TR:"1200",TE:"90",TH:"5",FOV:"350",nt:"Full biliary survey"},{n:"3D MRCP thin-slab",pl:"Coronal",TR:"3500",TE:"700",TH:"1.5",FOV:"300",nt:"Heavily T2 isotropic"},{n:"2D MRCP thick-slab",pl:"Coronal",TR:"8000",TE:"700",TH:"40",FOV:"300",nt:"Multiple angles"},{n:"T1 Fat Sat Axial",pl:"Axial",TR:"150",TE:"2.5",TH:"5",FOV:"360",nt:"Pancreas, biliary"},{n:"T2 TSE Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"360",nt:"Parenchyma"},{n:"DWI Axial",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"360",nt:"Stone vs sludge vs tumor"}],
+  special:["Secretin-enhanced MRCP","Liver multiphasic Gd if mass"],
+  notes:"NPO 4-6h. 3D MRCP: multiple oblique MIPs. Secretin: accentuates pancreatic duct and IPMN side-branch communication. CBD normal <= 6mm."
+},
+"abdomen-gen":{
+  ind:["Abdominal mass","Retroperitoneal mass","Peritoneal disease","Lymphoma staging","Post-surgical abdomen"],
+  sug:["Retroperitoneal sarcoma","Peritoneal carcinomatosis","Abdominal lymphoma staging","Mesenteric mass","Retroperitoneal fibrosis"],
+  title:"Abdomen — General MRI Protocol",contrast:true,
+  seq:[{n:"T2 HASTE Coronal",pl:"Coronal",TR:"1200",TE:"90",TH:"5",FOV:"400",nt:"Survey"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"90",TH:"5",FOV:"380",nt:"Primary lesion"},{n:"T1 In/Out Phase",pl:"Axial",TR:"150",TE:"2.4",TH:"5",FOV:"380",nt:"Fat content"},{n:"DWI b=0,50,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"380",nt:"Malignancy detection"},{n:"3D T1 GRE pre-Gd",pl:"Axial",TR:"3.5",TE:"1.7",TH:"4",FOV:"380",nt:""},{n:"Post-Gd Arterial",pl:"Axial",TR:"3.5",TE:"1.7",TH:"4",FOV:"380",nt:""},{n:"Post-Gd Portal",pl:"Axial",TR:"3.5",TE:"1.7",TH:"4",FOV:"380",nt:""},{n:"Post-Gd Delayed 5min",pl:"Axial",TR:"3.5",TE:"1.7",TH:"4",FOV:"380",nt:"Fibrosis delayed enhancement"}],
+  special:["DWI whole abdomen","MRCP if biliary","PET/MR correlation"],
+  notes:"Breath-hold sequences. Retroperitoneal fibrosis: delayed enhancement fibrous tissue. Lymphoma: DWI restricted, mild enhancement."
+},
+"mra-aorta":{
+  ind:["Aortic aneurysm","Aortic dissection","Mesenteric ischemia","Renal artery stenosis","Post-EVAR follow-up","Aortitis"],
+  sug:["Abdominal aortic aneurysm AAA surveillance","Aortic dissection Stanford B chronic","Celiac SMA stenosis mesenteric ischemia","Renal artery stenosis renovascular hypertension","Post-EVAR endoleak detection","Aortitis Takayasu arteritis"],
+  title:"Abdominal MRA / Aorta Protocol",contrast:true,
+  seq:[{n:"3D CE-MRA Aorta",pl:"Coronal",TR:"3.5",TE:"1.2",TH:"1",FOV:"450",nt:"Bolus-track aorta"},{n:"MIP projections",pl:"Multi",TR:"—",TE:"—",TH:"—",FOV:"—",nt:"AP, LAO, RAO"},{n:"T1 Axial pre-Gd",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"380",nt:"Aortic wall, thrombus"},{n:"T2 HASTE Axial",pl:"Axial",TR:"1200",TE:"90",TH:"5",FOV:"380",nt:""},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"450",nt:"Aortitis wall edema"},{n:"Post-Gd Arterial Axial",pl:"Axial",TR:"3.5",TE:"1.7",TH:"3",FOV:"380",nt:"Organ perfusion"}],
+  special:["4D Flow aorta","MR Wall Imaging aortitis","Renal MRA dedicated","Post-EVAR endoleak protocol"],
+  notes:"CE-MRA: bolus-track aorta, 1mm isotropic. AAA: max diameter, neck morphology. Dissection: true vs false lumen. Aortitis: STIR wall edema + enhancement."
+},
+"prostate":{
+  ind:["Prostate cancer staging","PSA elevated PI-RADS","Biopsy guidance","Biochemical recurrence","Active surveillance monitoring"],
+  sug:["Elevated PSA cancer detection","PI-RADS 4 peripheral zone lesion","Active surveillance mpMRI","Post-prostatectomy PSA rise","HIFU radiotherapy planning","PI-RADS 3 indeterminate","Extraprostatic extension T3a"],
+  title:"Prostate mpMRI Protocol (PI-RADS v2.1)",contrast:true,
+  seq:[{n:"T2 Axial small FOV",pl:"Axial",TR:"4000",TE:"100",TH:"3",FOV:"200",nt:"Zonal anatomy primary"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"3",FOV:"200",nt:"Seminal vesicles"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"3",FOV:"200",nt:"Apex, base"},{n:"DWI b=50,400,800,1400",pl:"Axial",TR:"5000",TE:"65",TH:"3",FOV:"200",nt:"ADC + high-b DWI"},{n:"DCE T1 Dynamic Gd",pl:"Axial",TR:"4",TE:"1.7",TH:"3",FOV:"200",nt:"Temporal res < 10s/phase"}],
+  special:["Calculated b2000 DWI","MR Spectroscopy optional","Large FOV T1 nodes/bones","DWI whole pelvis"],
+  notes:"PI-RADS v2.1: TZ dominant = T2; PZ dominant = DWI. ADC < 900 um2/s suspicious. DCE positive upgrades PI-RADS 3. No endorectal coil needed at 3T."
+},
+"uterus":{
+  ind:["Uterine fibroids","Endometrial cancer staging","Adenomyosis","Uterine anomaly","Pre-UAE mapping","Cervical cancer staging"],
+  sug:["Uterine fibroid mapping pre-UAE","Endometrial cancer FIGO staging","Adenomyosis vs fibroid","Mullerian duct anomaly","Cervical cancer parametrial invasion","Submucosal fibroid pre-hysteroscopy"],
+  title:"Uterus / Pelvis MRI Protocol",contrast:false,
+  seq:[{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:"Primary zonal anatomy"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T2 Axial pelvis",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T2 Axial uterine axis",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"200",nt:"Oblique to uterine axis"},{n:"T1 Axial pelvis",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Nodes, hemorrhage"},{n:"DWI b=0,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"280",nt:"Endometrial lesion"},{n:"Post-Gd T1 FS Sagittal",pl:"Sagittal",TR:"3.5",TE:"1.7",TH:"3",FOV:"280",nt:"Dynamic phases if staging"}],
+  special:["Dynamic contrast multiphasic","DWI high b-value","Oblique planes uterine axis"],
+  notes:"Antiperistaltic agent recommended. Sagittal T2 primary for JZ (JZ > 12mm = adenomyosis). Cancer staging: dynamic Gd essential for myometrial invasion."
+},
+"ovaries":{
+  ind:["Ovarian mass characterization","Ovarian torsion","Endometrioma","Complex ovarian cyst","PID","Ovarian cancer staging"],
+  sug:["Ovarian torsion emergency","Endometrioma bilateral T1 bright","Complex ovarian cyst O-RADS MRI","Ovarian cancer FIGO staging","Tubo-ovarian abscess TOA","PCOS polycystic ovaries","Borderline ovarian tumor","Granulosa cell tumor"],
+  title:"Ovaries / Adnexa MRI Protocol",contrast:true,
+  seq:[{n:"T2 Axial pelvis",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:"Primary lesion morphology"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"280",nt:"Endometrioma T1 bright"},{n:"T1 Axial no FS",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"280",nt:"Fat content dermoid"},{n:"DWI b=0,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"280",nt:"Malignancy risk"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"280",nt:"Solid component enhancement"}],
+  special:["O-RADS MRI scoring","Dynamic multiphasic Gd","Large FOV T1 peritoneal mets"],
+  notes:"T1 FS: endometrioma bright stays with FS (blood not fat). Dermoid: T1 bright drops with FS (fat). O-RADS MRI: solid enhancement = higher risk. DWI restricted + low ADC = malignant."
+},
+"bladder":{
+  ind:["Bladder tumor staging","Muscle-invasive bladder cancer","Bladder mass","Bladder fistula","Urachal anomaly"],
+  sug:["Muscle-invasive bladder cancer MIBC T2","Bladder TCC staging","Urachal carcinoma","Vesicovaginal fistula","Post-cystectomy recurrence"],
+  title:"Bladder MRI Protocol",contrast:true,
+  seq:[{n:"T2 Axial moderately full",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"220",nt:"Wall layers primary"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"DWI b=0,800",pl:"Axial",TR:"5000",TE:"65",TH:"4",FOV:"220",nt:"Tumor detection"},{n:"T1 Axial pelvis",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Lymph nodes"},{n:"DCE T1 Dynamic",pl:"Axial",TR:"4",TE:"1.7",TH:"4",FOV:"220",nt:"Early enhancement tumor"}],
+  special:["Post-Gd T1 FS delayed","MR Urography MRU","Large FOV nodal staging"],
+  notes:"Moderately full bladder optimal. T2 hypointense inner muscle layer = muscularis propria. DWI + DCE = VI-RADS score. Nodal: iliac + obturator chains."
+},
+"rectum":{
+  ind:["Rectal cancer staging","MRF involvement","Pre-op CRT restaging","Recurrent rectal cancer","Perianal fistula","Crohn perianal"],
+  sug:["Rectal adenocarcinoma T staging mrTRG","Mesorectal fascia MRF CRM involvement","Post-CRT restaging ypT assessment","Perianal fistula Parks classification","Crohn perianal disease","Recurrent rectal cancer vs fibrosis"],
+  title:"Rectum MRI Protocol",contrast:false,
+  seq:[{n:"T2 Axial small FOV",pl:"Axial",TR:"4000",TE:"100",TH:"3",FOV:"200",nt:"Perpendicular to rectum"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:"Tumor level, sphincter"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:"Levator ani, MRF"},{n:"T2 Axial large FOV pelvis",pl:"Axial",TR:"4000",TE:"100",TH:"5",FOV:"380",nt:"Nodal survey"},{n:"DWI b=0,800",pl:"Axial",TR:"5000",TE:"65",TH:"4",FOV:"280",nt:"Tumor response mrTRG"},{n:"T1 Axial pelvis",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Nodes, peritoneum"}],
+  special:["Post-Gd T1 FS fistula perianal","Dynamic contrast recurrence vs fibrosis","MR Lymphography"],
+  notes:"Axial PERPENDICULAR to rectal lumen. Antiperistaltic agent. Staging: T2 (depth invasion), N (nodes), MRF (< 1mm = CRM involved). Post-CRT: DWI key for mrTRG."
+},
+"pelvis-gen":{
+  ind:["Pelvic mass","Lymphadenopathy","Post-surgical pelvis","Pelvic floor dysfunction","Recurrent malignancy"],
+  sug:["Pelvic mass characterization","Pelvic lymph node staging","Post-hysterectomy recurrence","Pelvic floor prolapse dynamic","Obturator nerve entrapment"],
+  title:"Pelvis — General MRI Protocol",contrast:false,
+  seq:[{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"100",TH:"4",FOV:"280",nt:""},{n:"T2 Axial",pl:"Axial",TR:"4000",TE:"100",TH:"4",FOV:"300",nt:"Primary"},{n:"T2 Coronal",pl:"Coronal",TR:"4000",TE:"100",TH:"4",FOV:"300",nt:""},{n:"T1 Axial",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Nodes, hemorrhage"},{n:"DWI b=0,800",pl:"Axial",TR:"5000",TE:"65",TH:"5",FOV:"300",nt:"Lesion characterization"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"600",TE:"12",TH:"5",FOV:"300",nt:"Enhancement"}],
+  special:["Dynamic pelvic floor MRI","Post-Gd multiphasic"],
+  notes:"Antiperistaltic agent recommended. Large FOV for nodal survey. Dynamic pelvic floor: rest, squeeze, Valsalva, evacuation."
+},
+"fetal":{
+  ind:["Fetal brain abnormality","Neural tube defect","Corpus callosum agenesis","Ventriculomegaly","Posterior fossa abnormality","Fetal lung mass"],
+  sug:["Fetal ventriculomegaly > 10mm","Corpus callosum agenesis","Dandy-Walker spectrum","Myelomeningocele open spina bifida","Congenital diaphragmatic hernia CDH","CCAM cystic adenomatoid malformation","Sacrococcygeal teratoma"],
+  title:"Fetal MRI Protocol",contrast:false,
+  seq:[{n:"HASTE Sagittal fetal brain",pl:"Sagittal",TR:"1200",TE:"90",TH:"4",FOV:"300",nt:"Multiple orientations"},{n:"HASTE Axial fetal brain",pl:"Axial",TR:"1200",TE:"90",TH:"4",FOV:"300",nt:""},{n:"HASTE Coronal fetal brain",pl:"Coronal",TR:"1200",TE:"90",TH:"4",FOV:"300",nt:""},{n:"HASTE Whole fetus",pl:"Coronal",TR:"1200",TE:"90",TH:"5",FOV:"400",nt:"Anatomy survey"},{n:"HASTE Fetal body",pl:"Axial",TR:"1200",TE:"90",TH:"5",FOV:"350",nt:"Organs, abdominal"},{n:"TrueFISP / SSFP",pl:"Axial",TR:"4",TE:"2",TH:"5",FOV:"400",nt:"Fetal movement, heart"}],
+  special:["T1 GRE bowel signal hemorrhage","EPI DWI fetal brain","3D reconstruction"],
+  notes:"No Gd in fetal MRI. HASTE: fast single-shot, freeze motion. GA >= 20 weeks. Multiple orientations relative to fetal head."
+},
+"shoulder":{
+  ind:["Rotator cuff tear","Shoulder impingement","Labral tear SLAP","Glenohumeral instability","Bankart lesion","AC joint","Biceps tendon","Adhesive capsulitis"],
+  sug:["Full-thickness supraspinatus tear","Partial undersurface cuff tear","Bankart lesion anteroinferior","SLAP type 2 tear","Hill-Sachs bony Bankart","Adhesive capsulitis frozen shoulder","Biceps tendon proximal rupture","Posterosuperior impingement"],
+  title:"Shoulder MRI Protocol",contrast:false,
+  seq:[{n:"PD Fat Sat Coronal",pl:"Coronal",TR:"3500",TE:"35",TH:"3",FOV:"180",nt:"Rotator cuff primary"},{n:"T1 Coronal",pl:"Coronal",TR:"700",TE:"15",TH:"3",FOV:"180",nt:"Cuff anatomy, fat atrophy"},{n:"PD Fat Sat Sagittal",pl:"Sagittal",TR:"3500",TE:"35",TH:"3",FOV:"180",nt:"Supraspinatus outlet"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"3",FOV:"180",nt:"Labrum, subscapularis"},{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"3",FOV:"180",nt:""},{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"4",FOV:"180",nt:"Acromion morphology"}],
+  special:["MR Arthrography direct labrum instability","ABER position axial anteroinferior labrum","3D isotropic sequence"],
+  notes:"Coronal plane parallel to supraspinatus muscle. ABER: abduction + external rotation for anteroinferior labrum. Direct MR arthrography: most sensitive for labral tears, SLAP."
+},
+"elbow":{
+  ind:["Medial epicondylitis","Lateral epicondylitis","UCL tear","OCD capitellum","Cubital tunnel","Biceps triceps tear","Loose body","Tumor"],
+  sug:["Golfers elbow medial epicondylitis","Tennis elbow lateral epicondylitis","UCL tear throwing athlete","OCD capitellum juvenile","Cubital tunnel ulnar neuropathy","Distal biceps tendon tear","Posterolateral rotatory instability PLRI"],
+  title:"Elbow MRI Protocol",contrast:false,
+  seq:[{n:"PD Fat Sat Coronal",pl:"Coronal",TR:"3500",TE:"35",TH:"3",FOV:"150",nt:"Collateral ligaments primary"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"3",FOV:"150",nt:"Anatomy, bone"},{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"4",FOV:"150",nt:"Tendons, ulnar nerve"},{n:"T2 Fat Sat Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"150",nt:"Biceps, triceps"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"150",nt:"Bone marrow"}],
+  special:["MR Arthrography UCL indirect/direct","3D isotropic GRE","Post-Gd OCD viability"],
+  notes:"Elbow extended at side preferred. FOV 14-16cm. Coronal: collateral ligaments. Axial: ulnar nerve in cubital tunnel. MR arthrography: UCL partial tear, loose body."
+},
+"wrist":{
+  ind:["TFCC tear","Scaphoid fracture AVN","Wrist pain","Intercarpal ligament tear","Carpal tunnel","Kienboeck disease","Ganglion","Tendon pathology"],
+  sug:["TFCC peripheral tear","Scaphoid AVN Kienboeck stage III","Lunotriquetral ligament tear","Scapholunate dissociation","CTS carpal tunnel syndrome","De Quervain tenosynovitis","Radiocarpal ganglion cyst","ECU instability"],
+  title:"Wrist MRI Protocol",contrast:false,
+  seq:[{n:"PD Fat Sat Coronal",pl:"Coronal",TR:"3000",TE:"35",TH:"2",FOV:"120",nt:"TFCC & intercarpal ligaments"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"2",FOV:"120",nt:"AVN, anatomy"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"3",FOV:"120",nt:"Tendons, CTS, nerve"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"2",FOV:"120",nt:"Bone marrow, AVN"},{n:"PD Sagittal",pl:"Sagittal",TR:"3000",TE:"35",TH:"2",FOV:"120",nt:"Carpal alignment"}],
+  special:["MR Arthrography TFCC SL ligament","3D isotropic GRE","Post-Gd AVN infection mass"],
+  notes:"Dedicated wrist coil. FOV 10-12cm. 2mm coronal. 3T preferred. MR arthrography: most sensitive for partial TFCC and SL tears. AVN: T1 dark, STIR bright."
+},
+"hand":{
+  ind:["Soft tissue mass","Tendon tear","Joint synovitis","Osteomyelitis","Trigger finger","Tumor","Marrow pathology"],
+  sug:["Glomus tumor fingertip subungual","Digital fibroma","Extensor tendon tear zone 2","Dupuytren contracture nodule","Enchondroma phalanx","Giant cell tumor tendon sheath","Rheumatoid synovitis MCP","Flexor tendon pulley rupture"],
+  title:"Hand / Fingers MRI Protocol",contrast:false,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"600",TE:"12",TH:"3",FOV:"100",nt:"Anatomy"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"3",FOV:"100",nt:"Pathology"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"150",nt:"All digits survey"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"3",FOV:"150",nt:""},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"500",TE:"10",TH:"3",FOV:"100",nt:"Mass infection"}],
+  special:["3D high-res isotropic","MR Angiography digits"],
+  notes:"Surface coil. FOV 8-15cm. 3mm slices. Neutral superman position. Gd essential: mass characterization and infection. Glomus tumor: T2 very bright, avid enhancement, subungual."
+},
+"hip":{
+  ind:["Labral tear","FAI cam pincer","AVN femoral head","Cartilage damage","Occult fracture","Transient osteoporosis","Infection","Tumor"],
+  sug:["FAI cam deformity high alpha angle","Pincer FAI coxa profunda","Hip labral tear superior quadrant","AVN femoral head ARCO staging","Occult hip fracture elderly","Transient bone marrow edema syndrome","PVNS hip","Snapping hip iliopsoas"],
+  title:"Hip MRI Protocol",contrast:false,
+  seq:[{n:"T1 Coronal bilateral",pl:"Coronal",TR:"700",TE:"15",TH:"4",FOV:"380",nt:"Both hips comparison"},{n:"STIR Coronal bilateral",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"380",nt:"Marrow edema screening"},{n:"PD Fat Sat Coronal unilateral",pl:"Coronal",TR:"3500",TE:"35",TH:"3",FOV:"180",nt:"Small FOV labrum"},{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"3",FOV:"180",nt:"Labrum, cartilage"},{n:"T2 Fat Sat Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"180",nt:"Femoral head"},{n:"T1 Axial bilateral",pl:"Axial",TR:"700",TE:"15",TH:"4",FOV:"380",nt:"Bilateral comparison"}],
+  special:["MR Arthrography direct labrum FAI","Radial sequence 360 labrum","3D VIBE cartilage","dGEMRIC"],
+  notes:"Start bilateral large FOV, then small FOV unilateral. Radial plane: best 360 labral assessment. FAI: alpha angle > 55 cam. Direct arthrography: most sensitive. AVN: T1 hypointense band = necrosis."
+},
+"knee":{
+  ind:["ACL PCL injury","Meniscal tear","Cartilage damage","Bone bruise","Chondromalacia","Ligament injury","OCD","Bakers cyst","Infection","Tumor"],
+  sug:["ACL complete tear","Medial meniscus bucket-handle tear","Lateral meniscus posterior root tear","Chondromalacia patella grade 3","Bone bruise tibial plateau","OCD femoral condyle","PVNS knee","Segond fracture lateral capsule","Tibial plateau fracture MRI"],
+  title:"Knee MRI Protocol",contrast:false,
+  seq:[{n:"PD Fat Sat Sagittal",pl:"Sagittal",TR:"3500",TE:"35",TH:"3",FOV:"160",nt:"Ligaments, menisci primary"},{n:"T2 Fat Sat Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"160",nt:"MCL/LCL, menisci"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"160",nt:"Bone marrow edema"},{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"3",FOV:"160",nt:"Anatomy, meniscal roots"},{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"4",FOV:"160",nt:"Patellofemoral joint"},{n:"T2 Sagittal",pl:"Sagittal",TR:"4000",TE:"80",TH:"3",FOV:"160",nt:"PCL, popliteal fossa"}],
+  special:["3D DESS cartilage mapping","T2 Mapping","dGEMRIC","MR Arthrography loose body","Post-Gd PVNS synovitis"],
+  notes:"3mm slices for ligament resolution. FOV 16cm. Include full patellofemoral compartment on axial. Post-Gd: synovitis, PVNS (low T2 + enhancement). Arthrography: partial tears and loose bodies."
+},
+"ankle":{
+  ind:["ATFL CFL tear","Achilles tendon tear","Osteochondral lesion talus","Ankle pain","Tarsal tunnel","PTTD","Peroneal tendon tear","Infection","Tumor"],
+  sug:["Chronic lateral ankle instability ATFL","Complete Achilles tendon rupture","OCD talar dome Berndt-Harty","PTTD flatfoot","Peroneal tendon split tear","Tarsal tunnel syndrome","Os trigonum syndrome","Osteomyelitis diabetic ankle","Sinus tarsi syndrome"],
+  title:"Ankle MRI Protocol",contrast:false,
+  seq:[{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"3",FOV:"140",nt:"Tendons primary"},{n:"PD Fat Sat Coronal",pl:"Coronal",TR:"3500",TE:"35",TH:"3",FOV:"140",nt:"Ligaments, cartilage"},{n:"STIR Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"140",nt:"Bone marrow edema"},{n:"T1 Sagittal",pl:"Sagittal",TR:"700",TE:"15",TH:"3",FOV:"140",nt:"Anatomy"},{n:"T2 Fat Sat Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"140",nt:"Achilles tendon"},{n:"PD FS Coronal thin",pl:"Coronal",TR:"3500",TE:"35",TH:"2",FOV:"120",nt:"Ligament fine detail"}],
+  special:["3D isotropic multiplanar","MR Arthrography ankle","Post-Gd infection synovitis"],
+  notes:"Small FOV 12-14cm. 3mm slices. Axial best for peroneal and tibialis tendons. Sagittal for Achilles. 2mm coronal for ATFL/CFL. Post-Gd: osteomyelitis, synovitis."
+},
+"foot":{
+  ind:["Mortons neuroma","Plantar fasciitis","Stress fracture","Diabetic foot osteomyelitis","Tendon pathology","Lisfranc injury","Tumor","Marrow pathology"],
+  sug:["Mortons neuroma 3rd web space","Plantar fasciitis calcaneal insertion","Metatarsal stress fracture athlete","Diabetic foot osteomyelitis","Lisfranc ligament tear instability","Hallux sesamoiditis","Enchondroma metatarsal","Soft tissue sarcoma foot","Plantar fibromatosis Ledderhose"],
+  title:"Foot MRI Protocol",contrast:false,
+  seq:[{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"3",FOV:"150",nt:"Bone marrow primary"},{n:"T1 Coronal",pl:"Coronal",TR:"600",TE:"12",TH:"3",FOV:"150",nt:"Anatomy, fat planes"},{n:"PD Fat Sat Axial",pl:"Axial",TR:"3500",TE:"35",TH:"3",FOV:"150",nt:"Tendons, plantar fascia"},{n:"T2 Fat Sat Sagittal",pl:"Sagittal",TR:"4000",TE:"60",TH:"3",FOV:"150",nt:"Plantar fascia, Achilles"},{n:"T1 Sagittal",pl:"Sagittal",TR:"600",TE:"12",TH:"3",FOV:"150",nt:""},{n:"Post-Gd T1 FS Coronal",pl:"Coronal",TR:"500",TE:"10",TH:"3",FOV:"150",nt:"Osteomyelitis mass"}],
+  special:["Short-axis plantar fascia dedicated","3D isotropic Mortons neuroma"],
+  notes:"Foot neutral. FOV 14-16cm. Mortons neuroma: plantar coronal T1 and PD FS — < 5mm often not surgical. Post-Gd essential: diabetic foot osteomyelitis."
+},
+"thigh":{
+  ind:["Soft tissue mass","Muscle injury","Hamstring tear","Tumor","Myositis","Compartment syndrome","Hematoma"],
+  sug:["Hamstring proximal avulsion tear","Quadriceps hematoma post-trauma","Soft tissue sarcoma thigh","Myositis ossificans","Femoral nerve entrapment","Compartment syndrome chronic exertional"],
+  title:"Thigh MRI Protocol",contrast:false,
+  seq:[{n:"T1 Axial",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Bilateral comparison"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"5",FOV:"380",nt:"Muscle edema tear"},{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"5",FOV:"500",nt:"Full femur to knee"},{n:"T1 Coronal",pl:"Coronal",TR:"700",TE:"15",TH:"5",FOV:"500",nt:"Anatomy, tumor extent"},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"380",nt:"Mass myositis"}],
+  special:["Dynamic contrast sarcoma","MR Angiography vascular involvement"],
+  notes:"Large FOV full thigh. Sarcoma: pre-Gd T1 + T2 + post-Gd essential. Hamstring: coronal from ischial tuberosity to proximal belly. Myositis ossificans: peripheral calcification CT correlation."
+},
+"leg":{
+  ind:["Soft tissue mass","Bone tumor","Stress fracture","Shin splints","Compartment syndrome","Osteomyelitis","Tendon pathology"],
+  sug:["Tibial stress fracture","Shin splints MTSS","Osteomyelitis tibia","Peroneal nerve entrapment","Soft tissue sarcoma leg","Fibular stress fracture","Deep posterior compartment syndrome"],
+  title:"Leg (Tibia-Fibula) MRI Protocol",contrast:false,
+  seq:[{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"420",nt:"Full tibia-fibula"},{n:"T1 Coronal",pl:"Coronal",TR:"700",TE:"15",TH:"4",FOV:"420",nt:""},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"5",FOV:"300",nt:"Muscle compartments"},{n:"T1 Axial",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"300",nt:""},{n:"Post-Gd T1 FS Axial",pl:"Axial",TR:"500",TE:"10",TH:"5",FOV:"300",nt:"Mass infection"}],
+  special:["MR Angiography lower leg","3D isotropic lesion"],
+  notes:"Full tibia-fibula on STIR coronal. MTSS: periosteal edema medial tibia. Stress fracture: linear cortical T2 bright + marrow edema. Osteomyelitis: Gd essential."
+},
+"si-joints":{
+  ind:["Sacroiliitis","Ankylosing spondylitis","Axial spondyloarthropathy","Inflammatory back pain","Erosions","Enthesitis"],
+  sug:["Ankylosing spondylitis active sacroiliitis","Axial spondyloarthropathy SpA","Psoriatic arthritis SI joints","HLA-B27 inflammatory back pain","ASAS criteria BME assessment","Reactive arthritis Reiter","Enteropathic spondylitis IBD"],
+  title:"SI Joints MRI Protocol",contrast:false,
+  seq:[{n:"STIR Coronal oblique",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"250",nt:"Primary BME detection"},{n:"T1 Coronal oblique",pl:"Coronal",TR:"700",TE:"15",TH:"4",FOV:"250",nt:"Fat metaplasia, erosions"},{n:"T2 Fat Sat Coronal",pl:"Coronal",TR:"4000",TE:"90",TH:"4",FOV:"250",nt:"Cartilage, joint space"},{n:"T1 Axial pelvis",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Both SI joints"},{n:"STIR Axial",pl:"Axial",TR:"4000",TE:"60",TH:"4",FOV:"250",nt:"Erosions, subchondral edema"}],
+  special:["Post-Gd T1 FS synovitis activity","Whole spine STIR bamboo spine"],
+  notes:"Coronal oblique PERPENDICULAR to S2 vertebra (true SI joint plane). STIR: most sensitive for active BME. ASAS criteria: >=2 subchondral BME lesions OR 1 lesion on >=2 consecutive slices."
+},
+"symphysis":{
+  ind:["Osteitis pubis","Athletic pubalgia sports hernia","Pubic stress fracture","Adductor injury","Symphysis diastasis"],
+  sug:["Osteitis pubis footballer","Athletic pubalgia inguinal disruption","Adductor longus origin tear","Pubic symphysis stress fracture","Gracilis syndrome","Secondary cleft sign"],
+  title:"Pubic Symphysis MRI Protocol",contrast:false,
+  seq:[{n:"STIR Coronal",pl:"Coronal",TR:"4000",TE:"60",TH:"4",FOV:"250",nt:"Primary marrow edema"},{n:"T1 Coronal",pl:"Coronal",TR:"700",TE:"15",TH:"4",FOV:"250",nt:"Anatomy, stress fracture"},{n:"T2 Fat Sat Axial",pl:"Axial",TR:"4000",TE:"60",TH:"4",FOV:"220",nt:"Adductor origins"},{n:"PD Fat Sat Coronal",pl:"Coronal",TR:"3500",TE:"35",TH:"4",FOV:"250",nt:"Tendon insertion detail"},{n:"T1 Axial pelvis",pl:"Axial",TR:"700",TE:"15",TH:"5",FOV:"380",nt:"Bilateral comparison"}],
+  special:["Post-Gd T1 FS active osteitis","Whole pelvis bilateral adductors"],
+  notes:"Coronal primary. STIR: bilateral pubic bone BME + secondary cleft sign = acute osteitis pubis. Adductor origin: PD FS coronal for tendon tear."
+}
+};
+
+// ===== STATE =====
+let S={organ:null,ind:null,patient:"adult",contrast:"auto",vendor:"siemens",editing:false,seqs:[],proto:null,favs:[]};
+const VND={siemens:{lbl:"Siemens",mdl:"MAGNETOM"},ge:{lbl:"GE Healthcare",mdl:"SIGNA"},philips:{lbl:"Philips",mdl:"Ingenia"}};
+
+// ===== BUILD SIDEBAR NAV =====
+function buildNav(){
+  const nav=document.getElementById("organ-nav");
+  nav.innerHTML="";
+  for(const[gk,grp] of Object.entries(GROUPS)){
+    const g=document.createElement("div");g.className="grp";
+    const btn=document.createElement("button");
+    btn.className="grp-btn";btn.dataset.gk=gk;
+    btn.innerHTML='<span class="grp-ic">'+grp.icon+'</span>'+grp.label+'<span class="grp-chv">&#9658;</span>';
+    btn.onclick=function(){toggleGrp(gk,btn);};
+    const items=document.createElement("div");
+    items.className="grp-items";items.id="gi-"+gk;
+    for(const[ok,olbl] of Object.entries(grp.items)){
+      if(!DB[ok])continue;
+      const ob=document.createElement("button");
+      ob.className="organ-btn";ob.dataset.ok=ok;ob.textContent=olbl;
+      ob.onclick=(function(k,gl,ol,b){return function(){selectOrgan(k,gl,ol,b);};})(ok,grp.label,olbl,btn);
+      items.appendChild(ob);
+    }
+    g.appendChild(btn);g.appendChild(items);nav.appendChild(g);
+  }
+}
+
+function toggleGrp(gk,btn){
+  const ch=document.getElementById("gi-"+gk);
+  const isOpen=ch.classList.contains("open");
+  document.querySelectorAll(".grp-items").forEach(function(c){c.classList.remove("open");});
+  document.querySelectorAll(".grp-btn").forEach(function(b){b.classList.remove("open","active");});
+  if(!isOpen){ch.classList.add("open");btn.classList.add("open","active");}
+}
+
+// ===== BUILD WELCOME GRID =====
+function buildGrid(){
+  const g=document.getElementById("body-grid");
+  const items=[
+    {ico:"🧠",nm:"Neuro/Brain",gk:"neuro"},{ico:"🦴",nm:"Spine",gk:"spine"},
+    {ico:"🗣️",nm:"Head & Neck",gk:"neck"},{ico:"🫁",nm:"Chest",gk:"chest"},
+    {ico:"⭕",nm:"Abdomen",gk:"abdomen"},{ico:"🔵",nm:"Pelvis",gk:"pelvis"},
+    {ico:"💪",nm:"Upper Limb",gk:"upper"},{ico:"🦵",nm:"Lower Limb",gk:"lower"}
+  ];
+  g.innerHTML=items.map(function(i){
+    var cnt=Object.keys(GROUPS[i.gk].items).filter(function(k){return DB[k];}).length;
+    return '<div class="bg-card" onclick="clickGrid(\''+i.gk+'\')"><div class="bg-ico">'+i.ico+'</div><div class="bg-nm">'+i.nm+'</div><div class="bg-ct">'+cnt+' protocols</div></div>';
+  }).join("");
+}
+
+function clickGrid(gk){
+  var grp=GROUPS[gk];if(!grp)return;
+  var firstOk=Object.keys(grp.items).find(function(k){return DB[k];});
+  if(!firstOk)return;
+  var grpBtn=document.querySelector('[data-gk="'+gk+'"]');
+  if(grpBtn)toggleGrp(gk,grpBtn);
+  selectOrgan(firstOk,grp.label,grp.items[firstOk],grpBtn);
+}
+
+// ===== SELECT ORGAN =====
+function selectOrgan(ok,region,label,grpBtn){
+  S.organ=ok;S.ind=null;S.proto=null;S.editing=false;
+  document.querySelectorAll(".organ-btn").forEach(function(b){b.classList.remove("sel");});
+  var ob=document.querySelector('[data-ok="'+ok+'"]');if(ob)ob.classList.add("sel");
+  document.getElementById("welcome-view").classList.add("hidden");
+  document.getElementById("organ-view").classList.remove("hidden");
+  document.getElementById("bc-crumb").innerHTML='Home &rsaquo; <span>'+region+'</span> &rsaquo; <span>'+label+'</span>';
+  document.getElementById("pg-title").textContent=label+" MRI";
+  document.getElementById("pg-sub").textContent="Select indication and configure protocol parameters";
+  var p=DB[ok];if(!p)return;
+  var ic=document.getElementById("ind-chips");
+  ic.innerHTML=p.ind.map(function(i){return '<button class="chip" onclick="selInd(this,\''+i.replace(/'/g,"\\'")+'\')">' +i+'</button>';}).join("");
+  var sc=document.getElementById("sug-chips");
+  sc.innerHTML=p.sug.map(function(s){return '<button class="chip hot" onclick="applySug(\''+s.replace(/'/g,"\\'")+'\')">' +s+'</button>';}).join("");
+  document.getElementById("smart-ta").value="";
+  document.getElementById("res-wrap").classList.add("hidden");
+  document.getElementById("ld-wrap").classList.add("hidden");
+}
+
+function selInd(btn,ind){
+  document.querySelectorAll("#ind-chips .chip").forEach(function(b){b.classList.remove("on");});
+  btn.classList.add("on");S.ind=ind;
+  document.getElementById("smart-ta").value=ind;
+}
+function applySug(s){document.getElementById("smart-ta").value=s;}
+
+// ===== SEARCH =====
+var SIDX=[];
+for(var _ok in DB){
+  var _p=DB[_ok];
+  _p.ind.forEach(function(i){SIDX.push({ok:_ok,lbl:i});});
+  _p.sug.forEach(function(s){SIDX.push({ok:_ok,lbl:s});});
+}
+function findLabel(ok){
+  for(var gk in GROUPS){if(GROUPS[gk].items[ok])return GROUPS[gk].items[ok];}
+  return ok;
+}
+var _si=document.getElementById("sb-si");
+var _sd=document.getElementById("srch-drop");
+_si.addEventListener("input",function(){
+  var q=this.value.trim().toLowerCase();
+  if(!q){_sd.classList.remove("open");return;}
+  var hits=SIDX.filter(function(x){return x.lbl.toLowerCase().includes(q);}).slice(0,10);
+  if(!hits.length){_sd.classList.remove("open");return;}
+  _sd.innerHTML=hits.map(function(h){
+    return '<div class="srch-item" onclick="searchSel(\''+h.ok+'\',\''+h.lbl.replace(/'/g,"\\'")+'\')">'+'<div class="si-org">'+findLabel(h.ok)+'</div><div class="si-ind">'+h.lbl+'</div></div>';
+  }).join("");
+  _sd.classList.add("open");
+});
+_si.addEventListener("blur",function(){setTimeout(function(){_sd.classList.remove("open");},220);});
+
+function searchSel(ok,ind){
+  _sd.classList.remove("open");_si.value="";
+  var foundGk=null;
+  for(var gk in GROUPS){if(GROUPS[gk].items[ok]){foundGk=gk;break;}}
+  if(!foundGk)return;
+  var grpBtn=document.querySelector('[data-gk="'+foundGk+'"]');
+  toggleGrp(foundGk,grpBtn);
+  selectOrgan(ok,GROUPS[foundGk].label,GROUPS[foundGk].items[ok],grpBtn);
+  setTimeout(function(){
+    document.getElementById("smart-ta").value=ind;S.ind=ind;
+    document.querySelectorAll("#ind-chips .chip").forEach(function(b){if(b.textContent===ind)b.classList.add("on");});
+  },80);
+}
+
+// ===== GENERATE =====
+async function generate(){
+  if(!S.organ){alert("Please select a body part from the sidebar first.");return;}
+  var btn=document.getElementById("gen-btn");
+  var ldw=document.getElementById("ld-wrap");
+  var rw=document.getElementById("res-wrap");
+  btn.disabled=true;ldw.classList.remove("hidden");rw.classList.add("hidden");
+  var msgs=["Matching clinical indication...","Selecting optimal sequences...","Applying "+VND[S.vendor].lbl+" parameters...","Optimizing for "+document.getElementById("fld-str").value+"...","Building protocol..."];
+  var mi=0;
+  var tick=setInterval(function(){document.getElementById("ld-msg").textContent=msgs[Math.min(mi++,msgs.length-1)];},620);
+  var p=DB[S.organ];
+  var proto=null;
+  if(p){
+    await new Promise(function(r){setTimeout(r,1600);});
+    proto={title:p.title,contrast:p.contrast,sequences:p.seq.map(function(s){return Object.assign({},s);}),special:p.special,notes:p.notes};
+    S.seqs=JSON.parse(JSON.stringify(p.seq));
+  } else {
+    var inp=document.getElementById("smart-ta").value.trim();
+    var fs=document.getElementById("fld-str").value;
+    var prompt="You are a senior MRI radiologist. Generate an MRI protocol as JSON only.\nOrgan: "+findLabel(S.organ)+", Indication: "+(inp||S.ind||"Routine")+", Field: "+fs+", Vendor: "+VND[S.vendor].lbl+", Patient: "+S.patient+".\nReturn ONLY valid JSON:\n{\"title\":\"...\",\"contrast\":true,\"sequences\":[{\"n\":\"...\",\"pl\":\"Axial\",\"TR\":\"...\",\"TE\":\"...\",\"TH\":\"...\",\"FOV\":\"...\",\"nt\":\"...\"}],\"special\":[\"...\"],\"notes\":\"...\"}\nInclude 5-8 sequences.";
+    try{
+      var resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+      var data=await resp.json();
+      var raw=data.content.map(function(c){return c.text||"";}).join("");
+      var clean=raw.replace(/```json|```/g,"").trim();
+      proto=JSON.parse(clean);
+      S.seqs=JSON.parse(JSON.stringify(proto.sequences||[]));
+    }catch(e){
+      clearInterval(tick);ldw.classList.add("hidden");btn.disabled=false;
+      alert("Could not generate protocol. Please check connection.");return;
+    }
+  }
+  clearInterval(tick);ldw.classList.add("hidden");btn.disabled=false;
+  S.proto=proto;
+  renderResult(proto);
+  rw.classList.remove("hidden");
+  rw.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// ===== RENDER RESULT =====
+function renderResult(p){
+  var fs=document.getElementById("fld-str").value;
+  var vd=VND[S.vendor];
+  var withC=(p.contrast&&S.contrast!=="no")||S.contrast==="yes";
+  document.getElementById("r-title").textContent=p.title;
+  document.getElementById("r-meta").innerHTML=
+    '<span class="mb-t">'+fs+'</span>'+
+    '<span class="mb-b">'+vd.lbl+' '+vd.mdl+'</span>'+
+    '<span class="mb-a">'+(S.patient==="adult"?"Adult":"Pediatric")+'</span>'+
+    '<span class="'+(withC?"mb-c":"mb-t")+'">'+(withC?"With Contrast":"Without Contrast")+'</span>'+
+    '<span class="mb-p">'+S.seqs.length+' sequences</span>';
+  var body=document.getElementById("seq-body");
+  body.innerHTML="";
+  S.seqs.forEach(function(seq,i){
+    var plc=seq.pl.includes("Axial")?"pl-ax":seq.pl.includes("Sag")?"pl-sag":seq.pl.includes("Cor")?"pl-cor":"pl-mul";
+    var row=document.createElement("div");
+    row.className="seq-row";row.id="sr-"+i;
+    row.innerHTML=
+      '<div class="seq-num">'+(i+1)+'</div>'+
+      '<div><div class="seq-nm">'+seq.n+'</div>'+(seq.nt?'<div class="seq-nt">'+seq.nt+'</div>':'')+'</div>'+
+      '<div><span class="pl '+plc+'">'+seq.pl+'</span></div>'+
+      '<div class="pc hi" id="p-TR-'+i+'">'+(seq.TR||"—")+'</div>'+
+      '<div class="pc" id="p-TE-'+i+'">'+(seq.TE||"—")+'</div>'+
+      '<div class="pc" id="p-TH-'+i+'">'+(seq.TH||"—")+'</div>'+
+      '<div class="pc" id="p-FOV-'+i+'">'+(seq.FOV||"—")+'</div>'+
+      '<button class="rm-btn" onclick="removeSeq('+i+')">&#10005;</button>';
+    body.appendChild(row);
+  });
+  var spw=document.getElementById("sp-wrap");
+  var spc=document.getElementById("sp-chips");
+  var sps=p.special||[];
+  if(sps.length){spw.classList.remove("hidden");spc.innerHTML=sps.map(function(s){return '<span class="sp-chip">'+s+'</span>';}).join("");}
+  else spw.classList.add("hidden");
+  var ntw=document.getElementById("nt-wrap");
+  if(p.notes){ntw.classList.remove("hidden");document.getElementById("nt-txt").textContent=p.notes;}
+  else ntw.classList.add("hidden");
+  document.getElementById("ca-alert").classList.toggle("hidden",!withC);
+  document.getElementById("edit-btn").classList.remove("active");
+  S.editing=false;
+}
+
+function removeSeq(i){
+  S.seqs.splice(i,1);
+  if(S.proto)renderResult(Object.assign({},S.proto,{sequences:S.seqs}));
+}
+
+function toggleEdit(){
+  S.editing=!S.editing;
+  document.getElementById("edit-btn").classList.toggle("active",S.editing);
+  var keys=["TR","TE","TH","FOV"];
+  S.seqs.forEach(function(seq,i){
+    keys.forEach(function(k){
+      var el=document.getElementById("p-"+k+"-"+i);if(!el)return;
+      if(S.editing){
+        el.outerHTML='<input class="edit-inp" id="p-'+k+'-'+i+'" value="'+(seq[k]||"")+'" onchange="updParam('+i+',\''+k+'\',this.value)">';
+      } else {
+        var inp=document.getElementById("p-"+k+"-"+i);
+        if(inp)inp.outerHTML='<div class="pc hi" id="p-'+k+'-'+i+'">'+(seq[k]||"—")+'</div>';
+      }
+    });
+  });
+}
+function updParam(i,k,v){S.seqs[i][k]=v;}
+
+// ===== FAVORITES =====
+function saveFav(){
+  if(!S.proto)return;
+  var fav={id:Date.now(),title:S.proto.title,vendor:VND[S.vendor].lbl,patient:S.patient,fs:document.getElementById("fld-str").value,date:new Date().toLocaleDateString("en-GB"),proto:JSON.parse(JSON.stringify(S.proto)),seqs:JSON.parse(JSON.stringify(S.seqs))};
+  S.favs.unshift(fav);
+  try{localStorage.setItem("mripro_favs",JSON.stringify(S.favs));}catch(e){}
+  renderFavs();
+  var btn=document.getElementById("fav-btn");
+  btn.textContent="&#9733; Saved!";btn.classList.add("active");
+  setTimeout(function(){btn.textContent="&#9733; Save";btn.classList.remove("active");},2000);
+}
+function renderFavs(){
+  var list=document.getElementById("fav-list");
+  var emp=document.getElementById("fav-emp");
+  list.innerHTML="";
+  if(!S.favs.length){emp.classList.remove("hidden");return;}
+  emp.classList.add("hidden");
+  S.favs.forEach(function(fav){
+    var c=document.createElement("div");c.className="fav-card";
+    c.innerHTML=
+      '<div class="fav-ico">🧲</div>'+
+      '<div style="flex:1"><div class="fav-nm">'+fav.title+'</div><div class="fav-mt">'+fav.vendor+' &middot; '+fav.fs+' &middot; '+fav.patient+' &middot; '+fav.seqs.length+' seq &middot; '+fav.date+'</div></div>'+
+      '<div class="fav-acts"><button class="fb" onclick="loadFav('+fav.id+')">Load</button><button class="fb" onclick="delFav('+fav.id+')">Delete</button></div>';
+    list.appendChild(c);
+  });
+}
+function loadFav(id){
+  var fav=S.favs.find(function(f){return f.id===id;});if(!fav)return;
+  S.proto=fav.proto;S.seqs=JSON.parse(JSON.stringify(fav.seqs));
+  showTab("generator",document.getElementById("ft-gen"));
+  document.getElementById("welcome-view").classList.add("hidden");
+  document.getElementById("organ-view").classList.remove("hidden");
+  document.getElementById("pg-title").textContent=fav.title;
+  renderResult(fav.proto);
+  document.getElementById("res-wrap").classList.remove("hidden");
+}
+function delFav(id){
+  S.favs=S.favs.filter(function(f){return f.id!==id;});
+  try{localStorage.setItem("mripro_favs",JSON.stringify(S.favs));}catch(e){}
+  renderFavs();
+}
+
+// ===== EXPORT =====
+function exportP(){
+  if(!S.proto)return;
+  var p=S.proto;var vd=VND[S.vendor];var fs=document.getElementById("fld-str").value;
+  var sep="=".repeat(55);var sep2="-".repeat(55);
+  var lines=[sep,"  MRI PROTOCOL REPORT",sep,"  "+p.title,sep2,
+    "  Developer  : HUSSIEN IBRAHIM ELBANNA",
+    "  Vendor     : "+vd.lbl+" "+vd.mdl,"  Field      : "+fs,"  Patient   : "+S.patient,
+    "  Contrast   : "+(p.contrast?"Required":"Not required"),"  Date       : "+new Date().toLocaleDateString("en-GB"),
+    sep2,"  SEQUENCES",sep2];
+  S.seqs.forEach(function(s,i){
+    lines.push("  "+(i+1<10?"0":"")+(i+1)+". "+s.n);
+    lines.push("      Plane:"+s.pl+"  TR:"+s.TR+"ms  TE:"+s.TE+"ms  TH:"+s.TH+"mm  FOV:"+s.FOV+"mm"+(s.nt?"  // "+s.nt:""));
+  });
+  lines.push(sep2);
+  if(p.special&&p.special.length){lines.push("  SPECIAL SEQUENCES");lines.push(sep2);p.special.forEach(function(s){lines.push("  * "+s);});lines.push(sep2);}
+  if(p.notes){lines.push("  CLINICAL NOTES");lines.push(sep2);lines.push("  "+p.notes);lines.push(sep2);}
+  lines.push("  Contact: helbanna184@gmail.com | WhatsApp: +20 115 813 6157");
+  lines.push(sep);
+  var blob=new Blob([lines.join("\n")],{type:"text/plain"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="MRI_"+p.title.replace(/[^a-z0-9]/gi,"_").substring(0,40)+".txt";a.click();
+}
+
+// ===== CONTRAST CALC =====
+function calcDose(){
+  var wt=parseFloat(document.getElementById("c-wt").value);
+  var av=document.getElementById("c-agent").value;
+  var parts=av.split(",");var dr=parseFloat(parts[0]);var conc=parseFloat(parts[1]);
+  var rate=parseFloat(document.getElementById("c-rate").value);
+  var dout=document.getElementById("dose-out");
+  var dph=document.getElementById("dose-ph");
+  if(!wt||isNaN(wt)){dout.classList.add("hidden");dph.style.display="block";return;}
+  dout.classList.remove("hidden");dph.style.display="none";
+  var mmol=wt*dr;var ml=mmol/conc;var injT=ml/rate;
+  document.getElementById("d-vol").textContent=Math.round(ml*10)/10;
+  document.getElementById("d-mmol").textContent=Math.round(mmol*10)/10;
+  document.getElementById("d-time").textContent=Math.round(injT)+" s";
+  var age=parseInt(document.getElementById("c-age").value)||0;
+  var sfn=wt>120?"Warning: High body weight — consider capping at 20 mmol total. Check agent-specific prescribing info.":
+    age<18?"Pediatric: use macrocyclic agents only. Max 0.2 mmol/kg. GFR check mandatory.":
+    "Always check GFR before Gd. Avoid if GFR < 30 mL/min/1.73m2. Document prior Gd reactions.";
+  document.getElementById("d-sfn").textContent=sfn;
+}
+
+// ===== TOGGLES =====
+function setP(v){
+  S.patient=v;
+  document.getElementById("tg-ad").className="tog"+(v==="adult"?" on":"");
+  document.getElementById("tg-pd").className="tog"+(v==="pediatric"?" on":"");
+}
+function setC(v){
+  S.contrast=v;
+  [["tg-ca","auto"],["tg-cy","yes"],["tg-cn","no"]].forEach(function(pair){
+    document.getElementById(pair[0]).className="tog"+(pair[1]===v?" on":"");
+  });
+}
+function setV(v){
+  S.vendor=v;
+  [["v-s","siemens"],["v-g","ge"],["v-p","philips"]].forEach(function(pair){
+    document.getElementById(pair[0]).className="vnd"+(pair[1]===v?" sel":"");
+  });
+}
+function showTab(id,btn){
+  ["tab-generator","tab-contrast","tab-favorites","tab-contact"].forEach(function(t){document.getElementById(t).classList.add("hidden");});
+  document.getElementById("tab-"+id).classList.remove("hidden");
+  ["ft-gen","ft-calc","ft-fav","ft-contact"].forEach(function(b){document.getElementById(b).classList.remove("active");});
+  btn.classList.add("active");
+}
+
+// ===== INIT =====
+buildNav();
+buildGrid();
+try{var sv=localStorage.getItem("mripro_favs");if(sv)S.favs=JSON.parse(sv);renderFavs();}catch(e){}
+</script>
+</body>
+</html>
